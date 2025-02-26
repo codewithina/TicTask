@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A9D07C202D6FAB91004BC3F5 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = A9D07C1F2D6FAB88004BC3F5 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A9D07C002D6E5CB4004BC3F5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		A9D07BEF2D6E5CB2004BC3F5 /* TicTask.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TicTask.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9D07BFF2D6E5CB4004BC3F5 /* TicTaskTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TicTaskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9D07C092D6E5CB4004BC3F5 /* TicTaskUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TicTaskUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9D07C1F2D6FAB88004BC3F5 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		A9D07BE62D6E5CB2004BC3F5 = {
 			isa = PBXGroup;
 			children = (
+				A9D07C1F2D6FAB88004BC3F5 /* .gitignore */,
 				A9D07BF12D6E5CB2004BC3F5 /* TicTask */,
 				A9D07C022D6E5CB4004BC3F5 /* TicTaskTests */,
 				A9D07C0C2D6E5CB4004BC3F5 /* TicTaskUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9D07C202D6FAB91004BC3F5 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

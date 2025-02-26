@@ -1,0 +1,76 @@
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## User settings
+xcuserdata/
+*.xcworkspace
+*.xcuserstate
+*.xcuserdatad
+*.xcuserdatad/*
+
+## Obj-C/Swift specific
+*.hmap
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.app
+*.xcarchive
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+# Packages/
+# Package.pins
+Package.resolved
+# *.xcodeproj
+
+# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
+# hence it is not needed unless you have added a package configuration file to your project
+.swiftpm
+.build/
+
+# CocoaPods
+#
+# If you want to check in `Pods/`, remove this line.
+Pods/
+
+# Carthage
+#
+# If you want to check in dependencies, remove this line and only ignore `Carthage/Build/`
+Carthage/
+
+# fastlane
+#
+# Ignoring generated reports, metadata, and screenshots.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Logs and temporary files
+*.log
+*.swp
+*.swo
+*.bak
+*.tmp
+.DS_Store
+
+# Security & API keys
+*.key
+*.pem
+*.p12
+*.crt
+*.cer
+*.mobileprovision
+*.xcconfig
+
+# Firebase
+GoogleService-Info.plist
+
