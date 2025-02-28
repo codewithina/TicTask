@@ -85,10 +85,10 @@
 			isa = PBXGroup;
 			children = (
 				A9D07C1F2D6FAB88004BC3F5 /* .gitignore */,
+				A9D07BF02D6E5CB2004BC3F5 /* Products */,
 				A9D07BF12D6E5CB2004BC3F5 /* TicTask */,
 				A9D07C022D6E5CB4004BC3F5 /* TicTaskTests */,
 				A9D07C0C2D6E5CB4004BC3F5 /* TicTaskUITests */,
-				A9D07BF02D6E5CB2004BC3F5 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
