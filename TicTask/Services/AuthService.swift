@@ -14,7 +14,7 @@ class AuthService {
     private let db = Firestore.firestore()
 
     // Register new user and send to Firestore
-    func registerUser(email: String, password: String, name: String, role: String, parentID: String?, completion: @escaping (Result<User, Error>) -> Void) {
+    func registerUser(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?, completion: @escaping (Result<User, Error>) -> Void) {
         auth.createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 completion(.failure(error))
@@ -28,23 +28,52 @@ class AuthService {
                 "role": role
             ]
 
-            if role == "child", let parentID = parentID {
-                userData["parentIDs"] = [parentID]
+            if role == "child" {
+                userData["parentIDs"] = parentIDs ?? []
             } else if role == "parent" {
-                userData["children"] = []
+                userData["children"] = children ?? []
             }
 
-            // Save user in Firestore
             self.db.collection("users").document(userID).setData(userData) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    let user = User(id: userID, name: name, email: email, role: role, parentID: parentID, children: [])
-                    completion(.success(user))
+                    let user = User(id: userID, name: name, email: email, role: role, parentIDs: parentIDs ?? [], children: children ?? [])
+
+                    let batch = self.db.batch()
+
+                    // If child adds one or more parents during registration → Update parents `children`
+                    if let parentIDs = parentIDs {
+                        for parentID in parentIDs {
+                            let parentRef = self.db.collection("users").document(parentID)
+                            batch.updateData(["children": FieldValue.arrayUnion([userID])], forDocument: parentRef)
+                            print("🟢 Förälderns barnlista uppdaterad i Firestore: \(parentID)")
+                        }
+                    }
+
+                    // If parent adds one or more children during registration → Update child's `parentIDs`
+                    if let children = children {
+                        for childID in children {
+                            let childRef = self.db.collection("users").document(childID)
+                            batch.updateData(["parentIDs": FieldValue.arrayUnion([userID])], forDocument: childRef)
+                            print("🟢 Barnets föräldralista uppdaterad i Firestore: \(childID)")
+                        }
+                    }
+
+                    batch.commit { error in
+                        if let error = error {
+                            print("🔴 Firestore batch-uppdatering misslyckades: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        } else {
+                            print("✅ Firestore batch-uppdatering lyckades!")
+                            completion(.success(user))
+                        }
+                    }
                 }
             }
         }
     }
+
 
     // Login user and fetch Firestore-data
     func login(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
@@ -67,7 +96,7 @@ class AuthService {
                         name: data["name"] as? String ?? "",
                         email: data["email"] as? String ?? "",
                         role: data["role"] as? String ?? "",
-                        parentID: data["parentID"] as? String ?? "",
+                        parentIDs: data["parentIDs"] as? [String] ?? [],
                         children: data["children"] as? [String] ?? []
                     )
                     completion(.success(user))
