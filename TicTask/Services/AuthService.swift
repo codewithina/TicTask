@@ -29,7 +29,7 @@ class AuthService {
             ]
 
             if role == "child", let parentID = parentID {
-                userData["parentID"] = parentID
+                userData["parentIDs"] = [parentID]
             } else if role == "parent" {
                 userData["children"] = []
             }
