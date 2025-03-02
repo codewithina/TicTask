@@ -12,6 +12,6 @@ struct User: Identifiable, Codable {
     let name: String
     let email: String
     let role: String  // "child" or "parent"
-    let parentID: String?  // Connection to parent if child
+    let parentIDs: [String]?  // List of parents ID if child
     let children: [String]?  // List of childrens ID if parent
 }

@@ -13,11 +13,11 @@ class AuthViewModel: ObservableObject {
     private let authService = AuthService.shared
 
     // Register and auto login
-    func register(email: String, password: String, name: String, role: String, parentID: String?) {
+    func register(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?) {
         print("🟡 Försöker registrera användare: \(email)")
         self.errorMessage = nil
 
-        authService.registerUser(email: email, password: password, name: name, role: role, parentID: parentID) { result in
+        authService.registerUser(email: email, password: password, name: name, role: role, parentIDs: parentIDs, children: children) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let user):
