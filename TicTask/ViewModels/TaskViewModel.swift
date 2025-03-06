@@ -8,9 +8,12 @@
 import SwiftUI
 
 class TaskViewModel: ObservableObject {
+    static let shared = TaskViewModel()
+    
     @Published var tasks: [Task] = []
     @Published var errorMessage: String?
-
+    @Published var childrenTasks: [Task] = []
+    
     func addTask(title: String, description: String, xpReward: Int, createdBy: String, assignedTo: String) {
         TaskService.shared.addTask(title: title, description: description, xpReward: xpReward, createdBy: createdBy, assignedTo: assignedTo) { result in
             DispatchQueue.main.async {
@@ -38,6 +41,26 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
+    
+
+    func fetchChildrenTasks(for parent: User) {
+        guard let childrenIDs = parent.children, !childrenIDs.isEmpty else {
+            self.childrenTasks = []
+            return
+        }
+
+        TaskService.shared.fetchTasksForChildren(childrenIDs: childrenIDs) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let tasks):
+                    self.childrenTasks = tasks
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
 
     func markTaskAsCompleted(taskID: String) {
         TaskService.shared.updateTaskStatus(taskID: taskID, status: "completed") { result in
