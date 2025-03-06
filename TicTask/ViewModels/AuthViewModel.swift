@@ -11,6 +11,7 @@ class AuthViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var errorMessage: String?
     private let authService = AuthService.shared
+    private let taskViewModel = TaskViewModel.shared
 
     // Register and auto login
     func register(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?) {
@@ -44,6 +45,11 @@ class AuthViewModel: ObservableObject {
                     print("✅ Inloggning lyckades! Roll: \(user.role)")
                     self.user = user
                     self.isAuthenticated = true
+                    
+                    if user.role == "parent" {
+                        TaskViewModel.shared.fetchChildrenTasks(for: user)
+                    }
+                    
                 case .failure(let error):
                     print("🔴 Inloggning misslyckades: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
