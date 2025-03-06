@@ -55,6 +55,30 @@ class TaskService {
             }
         }
     }
+    
+    func fetchTasksForChildren(childrenIDs: [String], completion: @escaping (Result<[Task], Error>) -> Void) {
+        let tasksCollection = db.collection("tasks")
+        let query = tasksCollection.whereField("assignedTo", in: childrenIDs)
+
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                var tasks: [Task] = []
+                if let documents = snapshot?.documents {
+                    for document in documents {
+                        do {
+                            let task = try document.data(as: Task.self)
+                            tasks.append(task)
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
+                }
+                completion(.success(tasks))
+            }
+        }
+    }
 
     func updateTaskStatus(taskID: String, status: String, completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("tasks").document(taskID).updateData(["status": status]) { error in
