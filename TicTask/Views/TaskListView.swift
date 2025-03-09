@@ -1,41 +1,63 @@
 //
-//  TaskListView.swift
+//  ComboTaskListView.swift
 //  TicTask
 //
-//  Created by Ina Burström on 2025-03-03.
+//  Created by Ina Burström on 2025-03-09.
 //
 
 import SwiftUI
 
-struct TaskListView: View {
+struct ComboTaskListView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAddTaskView = false
 
+    var isParent: Bool {
+        authViewModel.user?.role == "parent"
+    }
+
+    var tasks: [Task] {
+        isParent ? taskViewModel.childrenTasks : taskViewModel.tasks
+    }
+
+    var title: String {
+        isParent ? "Barnens Läxor" : "Mina Läxor"
+    }
+
+    var emptyMessage: String {
+        isParent ? "Dina barn har inga läxor ännu." : "Du har inga läxor ännu."
+    }
+
     var body: some View {
         NavigationStack {
-            List(taskViewModel.tasks) { task in
-                NavigationLink(destination: TaskDetailView(task: task)) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(task.title)
-                                .font(.headline)
-                            Text(task.description)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
-                                .font(.subheadline)
-                                .foregroundColor(.red)
-                        }
-                        Spacer()
-                        if task.isCompleted {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+            VStack {
+                if tasks.isEmpty {
+                    Text(emptyMessage)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    List(tasks) { task in
+                        NavigationLink(destination: TaskDetailView(task: task)) {
+                            VStack(alignment: .leading) {
+                                Text(task.title)
+                                    .font(.headline)
+                                if isParent {
+                                    Text("Barn: \(task.assignedTo)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                Text(task.description)
+                                    .font(.subheadline)
+                                Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                    .font(.subheadline)
+                                    .foregroundColor(.red)
+                            }
                         }
                     }
                 }
             }
-            .navigationTitle("Mina Läxor")
+            .navigationTitle(title)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showAddTaskView = true }) {
@@ -48,13 +70,10 @@ struct TaskListView: View {
             }
             .onAppear {
                 if let user = authViewModel.user {
-                    taskViewModel.fetchTasks(for: user.id)
+                    print("🟢 \(title) laddas, startar Firestore-lyssnare...")
+                    taskViewModel.startListeningForTasks(for: user)
                 }
             }
         }
     }
-}
-
-#Preview {
-    TaskListView()
 }
