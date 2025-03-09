@@ -34,10 +34,13 @@ struct AddTaskView: View {
             Stepper("XP Belöning: \(xpReward)", value: $xpReward, in: 5...50, step: 5)
                 .padding()
             
-            if let user = authViewModel.user, user.role == "parent", let children = user.children {
+            if let user = authViewModel.user, user.role == "parent", let children = user.children, !children.isEmpty {
                 Picker("Välj barn", selection: $selectedChild) {
+                    Text("Välj ett barn").tag("")
+
                     ForEach(children, id: \.self) { childID in
-                        Text(childID).tag(childID)
+                        Text(authViewModel.childrenNames[childID] ?? "Okänt namn")
+                            .tag(childID)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
@@ -59,7 +62,7 @@ struct AddTaskView: View {
             }) {
                 Text("Lägg till läxa")
                     .padding()
-                    .background((authViewModel.user?.role == "parent" && selectedChild.isEmpty) ? Color.gray : Color.green) // 🔹 Grå om inget barn är valt
+                    .background((authViewModel.user?.role == "parent" && selectedChild.isEmpty) ? Color.gray : Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
