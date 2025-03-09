@@ -39,9 +39,9 @@ struct MainTabView: View {
                             Label("Hem", systemImage: "house.fill")
                         }
                     
-                    ParentTaskListView()
+                    TaskListView()
                         .tabItem {
-                            Label("Läxor", systemImage: "list.bullet.rectangle")
+                            Label("Läxor", systemImage: "list.bullet")
                         }
                     
                     ParentRewardsView()
