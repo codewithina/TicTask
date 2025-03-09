@@ -90,4 +90,34 @@ class TaskService {
             }
         }
     }
+    
+    func listenForTasks(for userID: String, completion: @escaping ([Task]) -> Void) {
+        let tasksCollection = db.collection("tasks")
+        
+        tasksCollection.whereField("assignedTo", isEqualTo: userID).addSnapshotListener { snapshot, error in
+            if let error = error {
+                print("🔴 Firestore realtidsuppdatering misslyckades: \(error.localizedDescription)")
+                return
+            }
+
+            guard let documents = snapshot?.documents else {
+                print("🟡 Inga uppgifter hittades för användare \(userID)")
+                completion([])
+                return
+            }
+
+            var tasks: [Task] = []
+            for document in documents {
+                do {
+                    let task = try document.data(as: Task.self)
+                    tasks.append(task)
+                } catch {
+                    print("🔴 Kunde inte konvertera uppgift: \(error.localizedDescription)")
+                }
+            }
+            completion(tasks)
+        }
+    }
+
+
 }
