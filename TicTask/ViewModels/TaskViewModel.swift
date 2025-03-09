@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 class TaskViewModel: ObservableObject {
     static let shared = TaskViewModel()
@@ -41,26 +42,6 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-    
-
-    func fetchChildrenTasks(for parent: User) {
-        guard let childrenIDs = parent.children, !childrenIDs.isEmpty else {
-            self.childrenTasks = []
-            return
-        }
-
-        TaskService.shared.fetchTasksForChildren(childrenIDs: childrenIDs) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let tasks):
-                    self.childrenTasks = tasks
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-
 
     func markTaskAsCompleted(taskID: String) {
         TaskService.shared.updateTaskStatus(taskID: taskID, status: "completed") { result in
@@ -74,4 +55,26 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
+    
+    func startListeningForTasks(for user: User) {
+            TaskService.shared.listenForTasks(for: user.id) { newTasks in
+                DispatchQueue.main.async {
+                    self.tasks = newTasks
+                }
+            }
+            
+            if user.role == "parent", let children = user.children {
+                for childID in children {
+                    TaskService.shared.listenForTasks(for: childID) { newTasks in
+                        DispatchQueue.main.async {
+                            self.childrenTasks = newTasks
+                            
+                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", parentIDs: [], children: nil))
+                        }
+                    }
+                }
+            }
+        }
+
+    
 }
