@@ -23,6 +23,9 @@ struct TaskListView: View {
                             Text(task.description)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
+                            Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                .font(.subheadline)
+                                .foregroundColor(.red)
                         }
                         Spacer()
                         if task.isCompleted {
