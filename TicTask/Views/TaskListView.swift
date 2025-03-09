@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ComboTaskListView: View {
+struct TaskListView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAddTaskView = false
