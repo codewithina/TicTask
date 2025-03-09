@@ -50,8 +50,13 @@ class AuthViewModel: ObservableObject {
                     
                     if user.role == "parent" {
                         self.fetchChildrenNames()
-                        //TaskViewModel.shared.fetchChildrenTasks(for: user)
                     }
+                    
+                    if user.role == "parent" || user.role == "child" {
+                        print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
+                        TaskViewModel.shared.startListeningForTasks(for: user)
+                    }
+
                     
                 case .failure(let error):
                     print("🔴 Inloggning misslyckades: \(error.localizedDescription)")
