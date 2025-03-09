@@ -11,6 +11,7 @@ struct Task: Identifiable, Codable {
     let id: String
     let title: String
     let description: String
+    let deadline: Date?
     let xpReward: Int
     var status: String // "pending" eller "completed"
     let assignedTo: String // Child ID
