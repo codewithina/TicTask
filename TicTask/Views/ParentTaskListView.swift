@@ -30,6 +30,9 @@ struct ParentTaskListView: View {
                                 .foregroundColor(.gray)
                             Text(task.description)
                                 .font(.subheadline)
+                            Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                .font(.subheadline)
+                                .foregroundColor(.red)
                         }
                     }
                 }
