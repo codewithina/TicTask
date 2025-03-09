@@ -14,8 +14,8 @@ class TaskViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var childrenTasks: [Task] = []
     
-    func addTask(title: String, description: String, xpReward: Int, createdBy: String, assignedTo: String) {
-        TaskService.shared.addTask(title: title, description: description, xpReward: xpReward, createdBy: createdBy, assignedTo: assignedTo) { result in
+    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String) {
+        TaskService.shared.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: createdBy, assignedTo: assignedTo) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
