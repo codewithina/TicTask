@@ -13,6 +13,7 @@ struct AddTaskView: View {
     @Binding var showAddTaskView: Bool
     @State private var title: String = ""
     @State private var description: String = ""
+    @State private var deadline: Date = Date()
     @State private var xpReward: Int = 10
     @State private var selectedChild: String = ""
     
@@ -24,6 +25,10 @@ struct AddTaskView: View {
             
             TextField("Beskrivning", text: $description)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            DatePicker("Deadline", selection: $deadline, displayedComponents: .date)
+                .datePickerStyle(CompactDatePickerStyle())
                 .padding()
             
             Stepper("XP Belöning: \(xpReward)", value: $xpReward, in: 5...50, step: 5)
@@ -43,11 +48,11 @@ struct AddTaskView: View {
                 if let user = authViewModel.user {
                     if user.role == "child" {
                         // Children adding tasks to themselves
-                        taskViewModel.addTask(title: title, description: description, xpReward: xpReward, createdBy: user.id, assignedTo: user.id)
+                        taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: user.id, assignedTo: user.id)
                         showAddTaskView = false
                     } else if user.role == "parent", !selectedChild.isEmpty {
                         // Parents must choose a child to be able to add task
-                        taskViewModel.addTask(title: title, description: description, xpReward: xpReward, createdBy: user.id, assignedTo: selectedChild)
+                        taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: user.id, assignedTo: selectedChild)
                         showAddTaskView = false
                     }
                 }
