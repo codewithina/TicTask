@@ -5,11 +5,13 @@
 //  Created by Ina Burström on 2025-02-28.
 //
 import SwiftUI
+import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
     @Published var user: User?  // Save user object
     @Published var isAuthenticated: Bool = false
     @Published var errorMessage: String?
+    @Published var childrenNames: [String: String] = [:]
     private let authService = AuthService.shared
     private let taskViewModel = TaskViewModel.shared
 
@@ -47,7 +49,8 @@ class AuthViewModel: ObservableObject {
                     self.isAuthenticated = true
                     
                     if user.role == "parent" {
-                        TaskViewModel.shared.fetchChildrenTasks(for: user)
+                        self.fetchChildrenNames()
+                        //TaskViewModel.shared.fetchChildrenTasks(for: user)
                     }
                     
                 case .failure(let error):
@@ -74,6 +77,30 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
+    
+    func fetchChildrenNames() {
+        guard let children = user?.children, !children.isEmpty else { return }
+
+        let group = DispatchGroup()
+
+        for childID in children {
+            group.enter()
+
+            Firestore.firestore().collection("users").document(childID).getDocument { snapshot, error in
+                if let data = snapshot?.data(), let name = data["name"] as? String {
+                    DispatchQueue.main.async {
+                        self.childrenNames[childID] = name
+                    }
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            print("✅ Alla barnens namn har hämtats: \(self.childrenNames)")
+        }
+    }
+    
 }
 
 
