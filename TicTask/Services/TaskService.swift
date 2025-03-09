@@ -11,13 +11,14 @@ class TaskService {
     static let shared = TaskService()
     private let db = Firestore.firestore()
 
-    func addTask(title: String, description: String, xpReward: Int, createdBy: String, assignedTo: String, completion: @escaping (Result<Task, Error>) -> Void) {
+    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, completion: @escaping (Result<Task, Error>) -> Void) {
         let taskID = UUID().uuidString // Create unique ID
 
         let taskData: [String: Any] = [
             "id": taskID,
             "title": title,
             "description": description,
+            "deadline": deadline != nil ? Timestamp(date: deadline!) : NSNull(),
             "xpReward": xpReward,
             "status": "pending",
             "createdBy": createdBy,
@@ -29,7 +30,7 @@ class TaskService {
             if let error = error {
                 completion(.failure(error))
             } else {
-                let task = Task(id: taskID, title: title, description: description, xpReward: xpReward, status: "pending", assignedTo: assignedTo, createdBy: createdBy)
+                let task = Task(id: taskID, title: title, description: description, deadline: deadline, xpReward: xpReward, status: "pending", assignedTo: assignedTo, createdBy: createdBy)
                 completion(.success(task))
             }
         }
