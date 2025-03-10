@@ -69,7 +69,7 @@ class TaskViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             self.childrenTasks = newTasks
                             
-                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", parentIDs: [], children: nil))
+                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", xp: nil, parentIDs: [], children: nil))
                         }
                     }
                 }
