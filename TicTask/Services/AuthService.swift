@@ -14,7 +14,7 @@ class AuthService {
     private let db = Firestore.firestore()
 
     // Register new user and send to Firestore
-    func registerUser(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?, completion: @escaping (Result<User, Error>) -> Void) {
+    func registerUser(email: String, password: String, name: String, role: String, xp: Int?, parentIDs: [String]?, children: [String]?, completion: @escaping (Result<User, Error>) -> Void) {
         auth.createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 completion(.failure(error))
@@ -38,7 +38,7 @@ class AuthService {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    let user = User(id: userID, name: name, email: email, role: role, parentIDs: parentIDs ?? [], children: children ?? [])
+                    let user = User(id: userID, name: name, email: email, role: role, xp: xp,  parentIDs: parentIDs ?? [], children: children ?? [])
 
                     let batch = self.db.batch()
 
@@ -96,6 +96,7 @@ class AuthService {
                         name: data["name"] as? String ?? "",
                         email: data["email"] as? String ?? "",
                         role: data["role"] as? String ?? "",
+                        xp: data["xp"] as? Int ?? 0,
                         parentIDs: data["parentIDs"] as? [String] ?? [],
                         children: data["children"] as? [String] ?? []
                     )
