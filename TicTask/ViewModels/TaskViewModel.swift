@@ -49,6 +49,7 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Läxa markerad som klar!")
+                    self.fetchTaskXPAndUpdateUser(taskID: taskID)
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
@@ -69,12 +70,39 @@ class TaskViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             self.childrenTasks = newTasks
                             
-                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", parentIDs: [], children: nil))
+                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", xp: nil, parentIDs: [], children: nil))
                         }
                     }
                 }
             }
         }
+    
+    private func fetchTaskXPAndUpdateUser(taskID: String) {
+        let taskRef = Firestore.firestore().collection("tasks").document(taskID)
+
+        taskRef.getDocument { snapshot, error in
+            if let error = error {
+                print("🔴 Misslyckades att hämta uppgiftsdata: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = snapshot?.data(),
+                  let assignedTo = data["assignedTo"] as? String,
+                  let xpReward = data["xpReward"] as? Int else {
+                print("🔴 Kunde inte hämta uppgiftens XP eller assignedTo")
+                return
+            }
+
+            TaskService.shared.updateUserXP(userID: assignedTo, xpReward: xpReward) { result in
+                switch result {
+                case .success:
+                    print("✅ XP uppdaterat för \(assignedTo)!")
+                case .failure(let error):
+                    print("🔴 Fel vid XP-uppdatering: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
 
     
 }
