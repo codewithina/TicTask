@@ -46,7 +46,7 @@ struct MainTabView: View {
                     
                     ParentRewardsView()
                         .tabItem {
-                            Label("Mina Barn", systemImage: "person.3.fill")
+                            Label("Mina Barn", systemImage: "gift.fill")
                         }
                     
                     ProfileView()
