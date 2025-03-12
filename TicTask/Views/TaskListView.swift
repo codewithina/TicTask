@@ -11,23 +11,23 @@ struct TaskListView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAddTaskView = false
-
+    
     var isParent: Bool {
         authViewModel.user?.role == "parent"
     }
-
+    
     var tasks: [Task] {
         isParent ? taskViewModel.childrenTasks : taskViewModel.tasks
     }
-
+    
     var title: String {
         isParent ? "Barnens Läxor" : "Mina Läxor"
     }
-
+    
     var emptyMessage: String {
         isParent ? "Dina barn har inga läxor ännu." : "Du har inga läxor ännu."
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -39,19 +39,26 @@ struct TaskListView: View {
                 } else {
                     List(tasks) { task in
                         NavigationLink(destination: TaskDetailView(task: task)) {
-                            VStack(alignment: .leading) {
-                                Text(task.title)
-                                    .font(.headline)
-                                if isParent {
-                                    Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(task.title)
+                                        .font(.headline)
+                                    if isParent {
+                                        Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
+                                    Text(task.description)
                                         .font(.subheadline)
-                                        .foregroundColor(.gray)
+                                    Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                        .font(.subheadline)
+                                        .foregroundColor(.red)
                                 }
-                                Text(task.description)
-                                    .font(.subheadline)
-                                Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
-                                    .font(.subheadline)
-                                    .foregroundColor(.red)
+                                Spacer()
+                                if task.isCompleted {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                }
                             }
                         }
                     }
