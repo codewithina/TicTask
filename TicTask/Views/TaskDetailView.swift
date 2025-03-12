@@ -10,6 +10,7 @@ import SwiftUI
 struct TaskDetailView: View {
     var task: Task
     @EnvironmentObject var taskViewModel: TaskViewModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -26,21 +27,26 @@ struct TaskDetailView: View {
             
             Spacer()
 
-            if !task.isCompleted {
-                Button(action: {
-                    taskViewModel.markTaskAsCompleted(taskID: task.id)
-                }) {
-                    Text("Markera som Klar")
-                        .padding()
+            ZStack {
+                if !task.isCompleted {
+                    Button(action: {
+                        taskViewModel.markTaskAsCompleted(taskID: task.id)
+                        dismiss()
+                    }) {
+                        Text("Markera som Klar")
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                } else {
+                    Text("✅ Slutförd!")
+                        .font(.title)
+                        .foregroundColor(.green)
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .padding()
                 }
-            } else {
-                Text("✅ Slutförd!")
-                    .font(.title)
-                    .foregroundColor(.green)
             }
         }
         .padding()

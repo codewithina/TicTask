@@ -43,7 +43,7 @@ struct TaskListView: View {
                                 Text(task.title)
                                     .font(.headline)
                                 if isParent {
-                                    Text("Barn: \(task.assignedTo)")
+                                    Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                 }
