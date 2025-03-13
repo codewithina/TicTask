@@ -9,8 +9,8 @@ import SwiftUI
 import FirebaseFirestore
 
 struct Reward: Identifiable, Codable {
-    @DocumentID var id: String?
-    let title: String
+    var id: String? 
+    var title: String
     let description: String
     let xpCost: Int
     let createdBy: String
