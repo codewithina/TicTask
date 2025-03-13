@@ -45,11 +45,10 @@ struct ProfileView: View {
 
                 Form {
                     // XP-section
-                    Section(header: Text("XP & Framsteg")) {
-                        Text("\(user?.xp ?? 0) XP")
+                    Section() {
+                        Text("\(user?.xp ?? 0) XP ")
                             .font(.largeTitle)
-                            .bold()
-                            .foregroundColor(.blue)
+                            .foregroundColor(.black)
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
@@ -62,7 +61,7 @@ struct ProfileView: View {
                                 Button(action: {
                                     // Handle add child
                                 }) {
-                                    Image(systemName: "plus.circle")
+                                    Image(systemName: "plus")
                                         .foregroundColor(.blue)
                                 }
                             }
