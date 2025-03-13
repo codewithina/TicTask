@@ -11,28 +11,17 @@ class TaskService {
     static let shared = TaskService()
     private let db = Firestore.firestore()
     
-    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, completion: @escaping (Result<Task, Error>) -> Void) {
-        let taskID = UUID().uuidString // Create unique ID
-        
-        let taskData: [String: Any] = [
-            "id": taskID,
-            "title": title,
-            "description": description,
-            "deadline": deadline != nil ? Timestamp(date: deadline!) : NSNull(),
-            "xpReward": xpReward,
-            "status": "pending",
-            "createdBy": createdBy,
-            "assignedTo": assignedTo,
-            "timestamp": Timestamp()
-        ]
-        
-        db.collection("tasks").document(taskID).setData(taskData) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                let task = Task(id: taskID, title: title, description: description, deadline: deadline, xpReward: xpReward, status: "pending", assignedTo: assignedTo, createdBy: createdBy)
-                completion(.success(task))
+    func addTask(_ task: Task, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            try db.collection("tasks").document(task.id).setData(from: task) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
             }
+        } catch {
+            completion(.failure(error))
         }
     }
     
@@ -125,22 +114,13 @@ class TaskService {
                 return
             }
             
-            guard let documents = snapshot?.documents else {
-                print("🟡 Inga uppgifter hittades för användare \(userID)")
-                completion([])
-                return
-            }
+            let newTasks = snapshot?.documents.compactMap { doc -> Task? in
+                try? doc.data(as: Task.self)
+            } ?? []
             
-            var tasks: [Task] = []
-            for document in documents {
-                do {
-                    let task = try document.data(as: Task.self)
-                    tasks.append(task)
-                } catch {
-                    print("🔴 Kunde inte konvertera uppgift: \(error.localizedDescription)")
-                }
+            DispatchQueue.main.async {
+                completion(newTasks)
             }
-            completion(tasks)
         }
     }
 }

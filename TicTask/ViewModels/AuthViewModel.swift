@@ -12,6 +12,7 @@ class AuthViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var errorMessage: String?
     @Published var childrenNames: [String: String] = [:]
+    @Published var parentNames: [String: String] = [:]
     private let authService = AuthService.shared
     private let taskViewModel = TaskViewModel.shared
 
@@ -50,6 +51,10 @@ class AuthViewModel: ObservableObject {
                     
                     if user.role == "parent" {
                         self.fetchChildrenNames()
+                    }
+                    
+                    if user.role == "child" {
+                        self.fetchParentNames()
                     }
                     
                     if user.role == "parent" || user.role == "child" {
@@ -106,6 +111,28 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    
+    func fetchParentNames() {
+            guard let parents = user?.parentIDs, !parents.isEmpty else { return }
+
+            let group = DispatchGroup()
+
+            for parentID in parents {
+                group.enter()
+                Firestore.firestore().collection("users").document(parentID).getDocument { snapshot, error in
+                    if let data = snapshot?.data(), let name = data["name"] as? String {
+                        DispatchQueue.main.async {
+                            self.parentNames[parentID] = name
+                        }
+                    }
+                    group.leave()
+                }
+            }
+
+            group.notify(queue: .main) {
+                print("✅ Alla föräldrars namn har hämtats: \(self.parentNames)")
+            }
+        }
 }
 
 
