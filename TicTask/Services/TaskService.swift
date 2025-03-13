@@ -11,28 +11,17 @@ class TaskService {
     static let shared = TaskService()
     private let db = Firestore.firestore()
     
-    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, completion: @escaping (Result<Task, Error>) -> Void) {
-        let taskID = UUID().uuidString // Create unique ID
-        
-        let taskData: [String: Any] = [
-            "id": taskID,
-            "title": title,
-            "description": description,
-            "deadline": deadline != nil ? Timestamp(date: deadline!) : NSNull(),
-            "xpReward": xpReward,
-            "status": "pending",
-            "createdBy": createdBy,
-            "assignedTo": assignedTo,
-            "timestamp": Timestamp()
-        ]
-        
-        db.collection("tasks").document(taskID).setData(taskData) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                let task = Task(id: taskID, title: title, description: description, deadline: deadline, xpReward: xpReward, status: "pending", assignedTo: assignedTo, createdBy: createdBy)
-                completion(.success(task))
+    func addTask(_ task: Task, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            try db.collection("tasks").document(task.id).setData(from: task) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
             }
+        } catch {
+            completion(.failure(error))
         }
     }
     
