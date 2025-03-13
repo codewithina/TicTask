@@ -40,7 +40,6 @@ struct TaskListView: View {
                     List(tasks) { task in
                         NavigationLink(destination: TaskDetailView(task: task)) {
                             HStack(spacing: 15) {
-                                // 🔹 Ikon med fast storlek och bakgrund
                                 ZStack {
                                     Circle()
                                         .fill(Color(hex: task.colorHex).opacity(0.2))
@@ -53,11 +52,10 @@ struct TaskListView: View {
                                         .foregroundColor(Color(hex: task.colorHex))
                                 }
                                 
-                                // 🔹 Textdel med fast bredd och alignment
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(task.title)
                                         .font(.headline)
-                                        .lineLimit(1) // Begränsar titeln till en rad
+                                        .lineLimit(1)
 
                                     if isParent {
                                         Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
@@ -67,7 +65,7 @@ struct TaskListView: View {
 
                                     Text(task.description)
                                         .font(.subheadline)
-                                        .lineLimit(2) // Begränsar beskrivningen till 2 rader för konsekvent layout
+                                        .lineLimit(2)
 
                                     Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
                                         .font(.subheadline)
