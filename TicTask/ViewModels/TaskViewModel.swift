@@ -14,6 +14,7 @@ class TaskViewModel: ObservableObject {
     @Published var tasks: [Task] = []
     @Published var errorMessage: String?
     @Published var childrenTasks: [Task] = []
+    @Published var isListening: Bool = false
     
     func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String) {
         TaskService.shared.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: createdBy, assignedTo: assignedTo) { result in
@@ -29,7 +30,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
+    
     func fetchTasks(for userID: String) {
         TaskService.shared.fetchTasks(for: userID) { result in
             DispatchQueue.main.async {
@@ -42,7 +43,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
+    
     func markTaskAsCompleted(taskID: String) {
         TaskService.shared.updateTaskStatus(taskID: taskID, status: "completed") { result in
             DispatchQueue.main.async {
@@ -58,28 +59,31 @@ class TaskViewModel: ObservableObject {
     }
     
     func startListeningForTasks(for user: User) {
-            TaskService.shared.listenForTasks(for: user.id) { newTasks in
-                DispatchQueue.main.async {
-                    self.tasks = newTasks
-                }
+        if isListening {
+            print("🟡 Redan lyssnar, avbryter ytterligare lyssning")
+            return
+        }
+        isListening = true
+        TaskService.shared.listenForTasks(for: user.id) { newTasks in
+            DispatchQueue.main.async {
+                self.tasks = newTasks
             }
-            
-            if user.role == "parent", let children = user.children {
-                for childID in children {
-                    TaskService.shared.listenForTasks(for: childID) { newTasks in
-                        DispatchQueue.main.async {
-                            self.childrenTasks = newTasks
-                            
-                            self.startListeningForTasks(for: User(id: childID, name: "", email: "", role: "child", xp: nil, parentIDs: [], children: nil))
-                        }
+        }
+        
+        if user.role == "parent", let children = user.children {
+            for childID in children {
+                TaskService.shared.listenForTasks(for: childID) { newTasks in
+                    DispatchQueue.main.async {
+                        self.childrenTasks.append(contentsOf: newTasks)
                     }
                 }
             }
         }
+    }
     
     private func fetchTaskXPAndUpdateUser(taskID: String) {
         let taskRef = Firestore.firestore().collection("tasks").document(taskID)
-
+        
         taskRef.getDocument { snapshot, error in
             if let error = error {
                 print("🔴 Misslyckades att hämta uppgiftsdata: \(error.localizedDescription)")
@@ -92,7 +96,7 @@ class TaskViewModel: ObservableObject {
                 print("🔴 Kunde inte hämta uppgiftens XP eller assignedTo")
                 return
             }
-
+            
             TaskService.shared.updateUserXP(userID: assignedTo, xpReward: xpReward) { result in
                 switch result {
                 case .success:
@@ -103,6 +107,6 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
+    
     
 }
