@@ -11,23 +11,23 @@ struct TaskListView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAddTaskView = false
-
+    
     var isParent: Bool {
         authViewModel.user?.role == "parent"
     }
-
+    
     var tasks: [Task] {
         isParent ? taskViewModel.childrenTasks : taskViewModel.tasks
     }
-
+    
     var title: String {
         isParent ? "Barnens Läxor" : "Mina Läxor"
     }
-
+    
     var emptyMessage: String {
         isParent ? "Dina barn har inga läxor ännu." : "Du har inga läxor ännu."
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -39,22 +39,46 @@ struct TaskListView: View {
                 } else {
                     List(tasks) { task in
                         NavigationLink(destination: TaskDetailView(task: task)) {
-                            VStack(alignment: .leading) {
-                                Text(task.title)
-                                    .font(.headline)
-                                if isParent {
-                                    Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
+                            HStack(spacing: 15) {
+                                // 🔹 Ikon med fast storlek och bakgrund
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: task.colorHex).opacity(0.2))
+                                        .frame(width: 50, height: 50)
+                                    
+                                    Image(systemName: task.iconName)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 25, height: 25)
+                                        .foregroundColor(Color(hex: task.colorHex))
                                 }
-                                Text(task.description)
-                                    .font(.subheadline)
-                                Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
-                                    .font(.subheadline)
-                                    .foregroundColor(.red)
+                                
+                                // 🔹 Textdel med fast bredd och alignment
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(task.title)
+                                        .font(.headline)
+                                        .lineLimit(1) // Begränsar titeln till en rad
+
+                                    if isParent {
+                                        Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
+
+                                    Text(task.description)
+                                        .font(.subheadline)
+                                        .lineLimit(2) // Begränsar beskrivningen till 2 rader för konsekvent layout
+
+                                    Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                        .font(.subheadline)
+                                        .foregroundColor(.red)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
+                            .padding(.vertical, 5)
                         }
                     }
+
                 }
             }
             .navigationTitle(title)
