@@ -16,20 +16,32 @@ class TaskViewModel: ObservableObject {
     @Published var childrenTasks: [Task] = []
     @Published var isListening: Bool = false
     
-    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String) {
-        TaskService.shared.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: createdBy, assignedTo: assignedTo) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    print("✅ Läxa tillagd!")
-                    self.fetchTasks(for: assignedTo)
-                case .failure(let error):
-                    print("🔴 Fel vid tillägg av läxa: \(error.localizedDescription)")
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
+    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, iconName: String, colorHex: String) {
+           let newTask = Task(
+               id: UUID().uuidString,
+               title: title,
+               description: description,
+               deadline: deadline,
+               xpReward: xpReward,
+               status: "pending",
+               assignedTo: assignedTo,
+               createdBy: createdBy,
+               iconName: iconName,
+               colorHex: colorHex
+           )
+           
+           TaskService.shared.addTask(newTask) { result in
+               DispatchQueue.main.async {
+                   switch result {
+                   case .success:
+                       print("✅ Läxa tillagd!")
+                   case .failure(let error):
+                       print("🔴 Fel vid tillägg av läxa: \(error.localizedDescription)")
+                       self.errorMessage = error.localizedDescription
+                   }
+               }
+           }
+       }
     
     func fetchTasks(for userID: String) {
         TaskService.shared.fetchTasks(for: userID) { result in
@@ -107,6 +119,4 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-    
-    
 }
