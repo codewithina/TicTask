@@ -24,7 +24,7 @@ struct RewardsView: View {
                             .scaledToFit()
                             .frame(width: 40, height: 40)
                             .foregroundColor(Color(hex: reward.colorHex))
-
+                        
                         VStack(alignment: .leading) {
                             Text(reward.title)
                                 .font(.headline)
@@ -35,15 +35,13 @@ struct RewardsView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.blue)
                         }
-
                         Spacer()
-
                         Button(action: {
                             if let userID = authViewModel.user?.id {
                                 rewardViewModel.redeemReward(reward: reward, userID: userID)
                             }
                         }) {
-                            Text("Lös in")
+                            Text("Köp")
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
@@ -56,12 +54,11 @@ struct RewardsView: View {
         }
         .onAppear {
             if let userID = authViewModel.user?.id {
-                rewardViewModel.loadRewards(for: userID)
+                rewardViewModel.startListeningForRewards(for: userID)
             }
         }
     }
 }
-
 
 #Preview {
     RewardsView()
