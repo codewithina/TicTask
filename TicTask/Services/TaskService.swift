@@ -125,22 +125,13 @@ class TaskService {
                 return
             }
             
-            guard let documents = snapshot?.documents else {
-                print("🟡 Inga uppgifter hittades för användare \(userID)")
-                completion([])
-                return
-            }
+            let newTasks = snapshot?.documents.compactMap { doc -> Task? in
+                try? doc.data(as: Task.self)
+            } ?? []
             
-            var tasks: [Task] = []
-            for document in documents {
-                do {
-                    let task = try document.data(as: Task.self)
-                    tasks.append(task)
-                } catch {
-                    print("🔴 Kunde inte konvertera uppgift: \(error.localizedDescription)")
-                }
+            DispatchQueue.main.async {
+                completion(newTasks)
             }
-            completion(tasks)
         }
     }
 }
