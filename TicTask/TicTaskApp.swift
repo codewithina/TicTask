@@ -12,6 +12,7 @@ import Firebase
 struct TicTaskApp: App {
     @StateObject private var authViewModel = AuthViewModel()
     @StateObject private var taskViewModel = TaskViewModel()
+    @StateObject private var rewardViewModel = RewardViewModel()
 
     init() {
         FirebaseApp.configure()
@@ -22,6 +23,7 @@ struct TicTaskApp: App {
             ContentView()
                 .environmentObject(authViewModel)
                 .environmentObject(taskViewModel)
+                .environmentObject(rewardViewModel)
         }
     }
 }
