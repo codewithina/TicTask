@@ -13,9 +13,11 @@ struct Task: Identifiable, Codable {
     let description: String
     let deadline: Date?
     let xpReward: Int
-    var status: String // "pending" eller "completed"
+    var status: String // "pending" or "completed"
     let assignedTo: String // Child ID
     let createdBy: String // Created by child or parent
+    let iconName: String // SF Symbol-name (ex: "star.fill")
+    let colorHex: String // Color in hex (ex: "#FF5733")
 
     // Return if task is done or not
     var isCompleted: Bool {
