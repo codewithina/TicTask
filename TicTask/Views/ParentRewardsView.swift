@@ -13,7 +13,7 @@ struct ParentRewardsView: View {
     @State private var showAddRewardView = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if rewardViewModel.createdRewards.isEmpty {
                     Text("Du har inte skapat några belöningar ännu.")
@@ -21,26 +21,35 @@ struct ParentRewardsView: View {
                         .padding()
                 } else {
                     List(rewardViewModel.createdRewards) { reward in
-                        HStack {
-                            Image(systemName: reward.iconName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(Color(hex: reward.colorHex))
+                        HStack(spacing: 15) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: reward.colorHex).opacity(0.2))
+                                    .frame(width: 50, height: 50)
 
-                            VStack(alignment: .leading) {
+                                Image(systemName: reward.iconName)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundColor(Color(hex: reward.colorHex))
+                            }
+
+                            VStack(alignment: .leading, spacing: 5) {
                                 Text(reward.title)
                                     .font(.headline)
+                                    .lineLimit(1)
+
                                 Text(reward.description)
                                     .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                    .lineLimit(2)
+
                                 Text("XP: \(reward.xpCost)")
                                     .font(.subheadline)
                                     .foregroundColor(.blue)
                             }
-                            Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .padding()
+                        .padding(.vertical, 5)
                     }
                 }
             }
@@ -63,7 +72,6 @@ struct ParentRewardsView: View {
         }
     }
 }
-
 
 #Preview {
     ParentRewardsView()
