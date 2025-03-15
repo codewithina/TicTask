@@ -17,19 +17,24 @@ struct SectionBox<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(title)
                 .font(.headline)
                 .padding(.horizontal)
+                .padding(.top, 8)
 
             content
-                .padding()
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemBackground))
-                        .shadow(radius: 3)
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.gray, lineWidth: 1)
+                        .background(Color(.systemBackground))
                 )
                 .padding(.horizontal)
+                .padding(.vertical)
         }
     }
 }
+
