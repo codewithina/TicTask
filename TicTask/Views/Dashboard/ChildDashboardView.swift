@@ -17,7 +17,9 @@ struct ChildDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    XPProgressView(userXP: authViewModel.user?.xp ?? 0, maxXP: 100)
+                    if let user = authViewModel.user {
+                        XPProgressView(xp: user.xp ?? 0, maxXP: 100)
+                    }
                     
                     NotificationSection()
                     
@@ -31,10 +33,12 @@ struct ChildDashboardView: View {
             }
             .navigationTitle("Dashboard")
             .onAppear {
-                if let user = authViewModel.user {
-                    notificationViewModel.startListeningForNotifications(for: user.id)
-                    rewardViewModel.startListeningForRewards(for: user.id)
+                if let user = authViewModel.user, let userID = user.id {
+                    notificationViewModel.startListeningForNotifications(for: userID)
+                    rewardViewModel.startListeningForRewards(for: userID)
                     taskViewModel.startListeningForTasks(for: user)
+                } else {
+                    print("🚨 Ingen användare inloggad eller `user.id` saknas")
                 }
             }
             .onDisappear {
@@ -49,6 +53,7 @@ struct ChildDashboardView: View {
         }.first
     }
 }
+
 
 
 #Preview {

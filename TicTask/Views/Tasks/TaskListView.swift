@@ -58,7 +58,7 @@ struct TaskListView: View {
                                         .lineLimit(1)
 
                                     if isParent {
-                                        Text("Barn: \(authViewModel.childrenNames[task.assignedTo] ?? "Okänt namn")")
+                                        Text("Barn: \(authViewModel.childrenUsers.first(where: { $0.id == task.assignedTo })?.name ?? "Okänt namn")")
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
                                     }
@@ -76,7 +76,6 @@ struct TaskListView: View {
                             .padding(.vertical, 5)
                         }
                     }
-
                 }
             }
             .navigationTitle(title)
@@ -89,12 +88,6 @@ struct TaskListView: View {
             }
             .sheet(isPresented: $showAddTaskView) {
                 AddTaskView(showAddTaskView: $showAddTaskView)
-            }
-            .onAppear {
-                if let user = authViewModel.user {
-                    print("🟢 \(title) laddas, startar Firestore-lyssnare...")
-                    taskViewModel.startListeningForTasks(for: user)
-                }
             }
         }
     }
