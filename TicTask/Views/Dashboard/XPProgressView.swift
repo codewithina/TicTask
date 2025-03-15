@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct XPProgressView: View {
-    var userXP: Int
+    let xp: Int
     var maxXP: Int
 
     var progress: CGFloat {
-        CGFloat(userXP) / CGFloat(maxXP)
+        CGFloat(xp) / CGFloat(maxXP)
     }
 
     var body: some View {
@@ -29,10 +29,10 @@ struct XPProgressView: View {
                 .rotationEffect(.degrees(180))
 
             VStack {
-                Text("\(userXP) XP")
+                Text("\(xp) XP")
                     .font(.title2)
                     .fontWeight(.bold)
-                Text("Nivå \(userXP / maxXP + 1)")
+                Text("Nivå \((xp) / maxXP + 1)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
