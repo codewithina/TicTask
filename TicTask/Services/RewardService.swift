@@ -32,7 +32,6 @@ class RewardService {
         }
     }
     
-    
     func fetchAvailableRewards(for userID: String, completion: @escaping (Result<[Reward], Error>) -> Void) {
         db.collection("rewards").whereField("assignedTo", arrayContains: userID).getDocuments { snapshot, error in
             if let error = error {
@@ -91,23 +90,6 @@ class RewardService {
         
     }
     
-    func fetchRewardsCreatedBy(parentID: String, completion: @escaping (Result<[Reward], Error>) -> Void) {
-        db.collection("rewards")
-            .whereField("createdBy", isEqualTo: parentID)
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                let rewards = snapshot?.documents.compactMap { doc -> Reward? in
-                    try? doc.data(as: Reward.self)
-                } ?? []
-                
-                completion(.success(rewards))
-            }
-    }
-    
     func listenForRewards(for userID: String, completion: @escaping ([Reward]) -> Void) {
         let rewardsCollection = db.collection("rewards")
         
@@ -145,6 +127,4 @@ class RewardService {
             }
         }
     }
-    
-    
 }
