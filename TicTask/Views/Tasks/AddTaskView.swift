@@ -15,7 +15,7 @@ struct AddTaskView: View {
     @State private var description = ""
     @State private var deadline = Date()
     @State private var xpReward = 10
-    @State private var selectedChild: User? // 🔥 Nu håller vi ett helt `User`-objekt istället för bara en sträng
+    @State private var selectedChild: User?
     @State private var selectedIcon = "pencil"
     @State private var selectedColor = "#FF5733"
     
@@ -41,7 +41,7 @@ struct AddTaskView: View {
                     
                     DatePicker("Deadline", selection: $deadline, displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
-
+                    
                     Stepper("XP Belöning: \(xpReward)", value: $xpReward, in: 5...50, step: 5)
                 }
                 
@@ -127,7 +127,7 @@ struct AddTaskView: View {
             print("🚨 Ingen användare inloggad eller `user.id` saknas")
             return
         }
-
+        
         if user.role == "child" {
             taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: userID, iconName: selectedIcon, colorHex: selectedColor)
         } else if user.role == "parent", let child = selectedChild {
