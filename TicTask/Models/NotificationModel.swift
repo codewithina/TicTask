@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct NotificationModel: Identifiable, Codable {
-    var id: String = UUID().uuidString
+    @DocumentID var id: String?
     let message: String
     let timestamp: Date
 
