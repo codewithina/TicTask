@@ -1,5 +1,5 @@
 //
-//  XPProgressView..swift
+//  XPProgressView.swift
 //  TicTask
 //
 //  Created by Ina Burström on 2025-03-14.
@@ -9,10 +9,10 @@ import SwiftUI
 
 struct XPProgressView: View {
     let xp: Int
-    var maxXP: Int
+    let maxXP: Int
 
     var progress: CGFloat {
-        CGFloat(xp) / CGFloat(maxXP)
+        maxXP > 0 ? CGFloat(xp) / CGFloat(maxXP) : 0
     }
 
     var body: some View {
@@ -32,7 +32,7 @@ struct XPProgressView: View {
                 Text("\(xp) XP")
                     .font(.title2)
                     .fontWeight(.bold)
-                Text("Nivå \((xp) / maxXP + 1)")
+                Text("Nivå \(max(1, (xp / maxXP) + 1))")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
@@ -40,4 +40,3 @@ struct XPProgressView: View {
         .padding(.top)
     }
 }
-
