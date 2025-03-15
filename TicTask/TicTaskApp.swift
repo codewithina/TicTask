@@ -64,8 +64,8 @@ struct TicTaskApp: App {
                     .fill(Color.orange.opacity(0.3))
                     .frame(width: 140, height: 140)
                     .offset(x: -200, y: 250)
-                    .blur(radius: 35)}
+                    .blur(radius: 35)}*/
             
-        }*/
+        }
     }
 }
