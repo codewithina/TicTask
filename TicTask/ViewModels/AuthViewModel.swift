@@ -15,12 +15,11 @@ class AuthViewModel: ObservableObject {
     @Published var parentNames: [String: String] = [:]
     private let authService = AuthService.shared
     private let taskViewModel = TaskViewModel.shared
-
-    // Register and auto login
+    
     func register(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?) {
         print("🟡 Försöker registrera användare: \(email)")
         self.errorMessage = nil
-
+        
         authService.registerUser(email: email, password: password, name: name, role: role, parentIDs: parentIDs, children: children) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -35,12 +34,11 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-  
-    // Login and fetch user info
+    
     func login(email: String, password: String) {
         print("🟡 Försöker logga in: \(email)")
         self.errorMessage = nil
-
+        
         authService.login(email: email, password: password) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -61,7 +59,7 @@ class AuthViewModel: ObservableObject {
                         print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
                         TaskViewModel.shared.startListeningForTasks(for: user)
                     }
-
+                    
                     
                 case .failure(let error):
                     print("🔴 Inloggning misslyckades: \(error.localizedDescription)")
@@ -70,8 +68,7 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-
-    // Logout user
+    
     func logout() {
         authService.logout { result in
             DispatchQueue.main.async {
@@ -90,12 +87,12 @@ class AuthViewModel: ObservableObject {
     
     func fetchChildrenNames() {
         guard let children = user?.children, !children.isEmpty else { return }
-
+        
         let group = DispatchGroup()
-
+        
         for childID in children {
             group.enter()
-
+            
             Firestore.firestore().collection("users").document(childID).getDocument { snapshot, error in
                 if let data = snapshot?.data(), let name = data["name"] as? String {
                     DispatchQueue.main.async {
@@ -105,34 +102,33 @@ class AuthViewModel: ObservableObject {
                 group.leave()
             }
         }
-
+        
         group.notify(queue: .main) {
             print("✅ Alla barnens namn har hämtats: \(self.childrenNames)")
         }
     }
     
-    
     func fetchParentNames() {
-            guard let parents = user?.parentIDs, !parents.isEmpty else { return }
-
-            let group = DispatchGroup()
-
-            for parentID in parents {
-                group.enter()
-                Firestore.firestore().collection("users").document(parentID).getDocument { snapshot, error in
-                    if let data = snapshot?.data(), let name = data["name"] as? String {
-                        DispatchQueue.main.async {
-                            self.parentNames[parentID] = name
-                        }
+        guard let parents = user?.parentIDs, !parents.isEmpty else { return }
+        
+        let group = DispatchGroup()
+        
+        for parentID in parents {
+            group.enter()
+            Firestore.firestore().collection("users").document(parentID).getDocument { snapshot, error in
+                if let data = snapshot?.data(), let name = data["name"] as? String {
+                    DispatchQueue.main.async {
+                        self.parentNames[parentID] = name
                     }
-                    group.leave()
                 }
-            }
-
-            group.notify(queue: .main) {
-                print("✅ Alla föräldrars namn har hämtats: \(self.parentNames)")
+                group.leave()
             }
         }
+        
+        group.notify(queue: .main) {
+            print("✅ Alla föräldrars namn har hämtats: \(self.parentNames)")
+        }
+    }
 }
 
 
