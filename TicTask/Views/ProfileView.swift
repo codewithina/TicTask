@@ -9,25 +9,20 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-
-    var user: User? {
-        authViewModel.user
-    }
     
     var isParent: Bool {
-        user?.role == "parent"
+        authViewModel.user?.role == "parent"
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack {
-                // Profile pic and name
                 VStack {
                     ZStack {
                         Circle()
                             .fill(Color.blue.opacity(0.3))
                             .frame(width: 110, height: 110)
-
+                        
                         Image(systemName: "person.circle.fill") // Placeholder avatar
                             .resizable()
                             .scaledToFit()
@@ -35,48 +30,48 @@ struct ProfileView: View {
                             .foregroundColor(.blue)
                     }
                     .padding(.top, 20)
-
-                    Text(user?.name ?? "Okänt namn")
+                    
+                    Text(authViewModel.user?.name ?? "Okänt namn")
                         .font(.title2)
                         .bold()
                         .padding(.top, 5)
                 }
                 .padding(.bottom, 20)
-
+                
                 Form {
-                    // XP-section
-                    Section() {
-                        Text("\(user?.xp ?? 0) XP ")
+                    
+                    Section {
+                        Text("\(authViewModel.user?.xp ?? 0) XP")
                             .font(.largeTitle)
                             .foregroundColor(.black)
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
-                    // Family
+                    
                     if isParent {
                         Section(
                             header: HStack {
                                 Text("Mina barn")
                                 Spacer()
                                 Button(action: {
-                                    // Handle add child
+                                    // Add children, create function
                                 }) {
                                     Image(systemName: "plus")
                                         .foregroundColor(.blue)
                                 }
                             }
                         ) {
-                            if let children = user?.children, !children.isEmpty {
-                                ForEach(children, id: \.self) { childID in
+                            if authViewModel.childrenUsers.isEmpty {
+                                Text("Inga barn kopplade.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(authViewModel.childrenUsers, id: \.id) { child in
                                     VStack(alignment: .leading) {
-                                        Text(authViewModel.childrenNames[childID] ?? "Barn")
+                                        Text(child.name)
                                             .font(.body)
                                     }
                                     .padding(.vertical, 5)
                                 }
-                            } else {
-                                Text("Inga barn kopplade.")
-                                    .foregroundColor(.gray)
                             }
                         }
                     } else {
@@ -85,14 +80,14 @@ struct ProfileView: View {
                                 Text("Mina föräldrar")
                                 Spacer()
                                 Button(action: {
-                                    // HHandle add parent
+                                    // Add parent, create function
                                 }) {
                                     Image(systemName: "plus")
                                         .foregroundColor(.blue)
                                 }
                             }
                         ) {
-                            if let parents = user?.parentIDs, !parents.isEmpty {
+                            if let parents = authViewModel.user?.parentIDs, !parents.isEmpty {
                                 ForEach(parents, id: \.self) { parentID in
                                     VStack(alignment: .leading) {
                                         Text(authViewModel.parentNames[parentID] ?? "Förälder")
@@ -113,6 +108,7 @@ struct ProfileView: View {
         }
     }
 }
+
 
 #Preview {
     ProfileView()
