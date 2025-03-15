@@ -14,6 +14,8 @@ class RewardViewModel: ObservableObject {
     @Published var createdRewards: [Reward] = []
     @Published var errorMessage: String?
     
+    var notificationViewModel: NotificationViewModel?
+    
     func addReward(title: String, description: String, xpCost: Int, iconName: String, colorHex: String, createdBy: String, assignedTo: [String]) {
         let newReward = Reward(
             id: nil,
@@ -26,12 +28,17 @@ class RewardViewModel: ObservableObject {
             iconName: iconName,
             colorHex: colorHex
         )
-        
+
         RewardService.shared.addReward(reward: newReward) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
                     print("✅ Reward skapad och sparad i Firestore!")
+
+                    for childID in assignedTo {
+                        self.notificationViewModel?.sendNotification(to: childID, message: "Ny belöning: \(title)")
+                    }
+
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                     print("🔴 Fel vid skapande av reward: \(error.localizedDescription)")
@@ -60,19 +67,6 @@ class RewardViewModel: ObservableObject {
                 case .success:
                     print("✅ Reward inlöst!")
                     self.loadRewards(for: userID)
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-    
-    func loadCreatedRewards(for parentID: String) {
-        RewardService.shared.fetchRewardsCreatedBy(parentID: parentID) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let rewards):
-                    self.createdRewards = rewards
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }

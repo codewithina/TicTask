@@ -11,6 +11,7 @@ struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var rewardViewModel: RewardViewModel
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
 
     var body: some View {
         if authViewModel.isAuthenticated {
