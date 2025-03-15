@@ -1,36 +1,19 @@
 //
-//  TicTaskApp.swift
+//  BackgroundView.swift
 //  TicTask
 //
-//  Created by Ina Burström on 2025-02-25.
+//  Created by Ina Burström on 2025-03-15.
 //
 
 import SwiftUI
-import Firebase
 
-@main
-struct TicTaskApp: App {
-    @StateObject private var authViewModel = AuthViewModel()
-    @StateObject private var taskViewModel = TaskViewModel()
-    @StateObject private var rewardViewModel = RewardViewModel()
-    @StateObject private var notificationViewModel = NotificationViewModel()
-    
-    init() {
-        FirebaseApp.configure()
-    }
-    
-    var body: some Scene {
-        WindowGroup {
-            //ZStack{
-                ContentView()
-                    .environmentObject(authViewModel)
-                    .environmentObject(taskViewModel)
-                    .environmentObject(rewardViewModel)
-                    .environmentObject(notificationViewModel)
-                    .onAppear {
-                        rewardViewModel.notificationViewModel = notificationViewModel
-                    }
-               /* Circle()
+struct BackgroundView: View {
+    var body: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+            
+            ZStack {
+                Circle()
                     .fill(Color.purple.opacity(0.3))
                     .frame(width: 200, height: 200)
                     .offset(x: -100, y: -200)
@@ -64,8 +47,8 @@ struct TicTaskApp: App {
                     .fill(Color.orange.opacity(0.3))
                     .frame(width: 140, height: 140)
                     .offset(x: -200, y: 250)
-                    .blur(radius: 35)}
-            
-        }*/
+                    .blur(radius: 35)
+            }
+        }
     }
 }
