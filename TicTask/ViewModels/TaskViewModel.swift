@@ -63,10 +63,15 @@ class TaskViewModel: ObservableObject {
             return
         }
         isListening = true
-        TaskService.shared.listenForTasks(for: user.id) { newTasks in
-            DispatchQueue.main.async {
-                self.tasks = newTasks
+        
+        if let userID = user.id {
+            TaskService.shared.listenForTasks(for: userID) { newTasks in
+                DispatchQueue.main.async {
+                    self.tasks = newTasks
+                }
             }
+        } else {
+            print("🚨 `user.id` är nil – kan inte lyssna på uppgifter")
         }
         
         if user.role == "parent", let children = user.children {
