@@ -72,10 +72,21 @@ struct ProfileView: View {
                                     HStack {
                                         Text(child.name)
                                             .font(.body)
-                                        
                                         Spacer()
                                     }
                                     .padding(.vertical, 5)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            if let childID = child.id {
+                                                authViewModel.removeChild(childID: childID)
+                                            } else {
+                                                print("⚠️ Error: child.id är nil!")
+                                            }
+                                        } label: {
+                                            Label("Ta bort", systemImage: "trash")
+                                        }
+                                    }
+                                    
                                 }
                             }
                         }
@@ -110,11 +121,4 @@ struct ProfileView: View {
             }
         }
     }
-}
-
-
-
-#Preview {
-    ProfileView()
-        .environmentObject(AuthViewModel())
 }
