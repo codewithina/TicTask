@@ -8,18 +8,19 @@ import SwiftUI
 import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
+    var taskViewModel: TaskViewModel?
+    
+    private let authService = AuthService.shared
+    private let db = Firestore.firestore()
+    private var childrenListeners: [ListenerRegistration] = []
+    private var userListener: ListenerRegistration?
+    
     @Published var user: User?
     @Published var isAuthenticated: Bool = false
     @Published var errorMessage: String?
     @Published var childrenNames: [String: String] = [:]
     @Published var parentNames: [String: String] = [:]
     @Published var childrenUsers: [User] = []
-    private let authService = AuthService.shared
-    private let taskViewModel = TaskViewModel.shared
-    
-    private let db = Firestore.firestore()
-    private var childrenListeners: [ListenerRegistration] = []
-    private var userListener: ListenerRegistration?
     
     func register(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?) {
         print("🟡 Försöker registrera användare: \(email)")
@@ -44,7 +45,7 @@ class AuthViewModel: ObservableObject {
                     if user.role == "parent" || user.role == "child" {
                         print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
                         self.startListeningForUserChanges()
-                        TaskViewModel.shared.startListeningForTasks(for: user)
+                        self.taskViewModel?.startListeningForTasks(for: user)
                     }
                     
                 case .failure(let error):
@@ -78,7 +79,7 @@ class AuthViewModel: ObservableObject {
                     if user.role == "parent" || user.role == "child" {
                         print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
                         self.startListeningForUserChanges()
-                        TaskViewModel.shared.startListeningForTasks(for: user)
+                        self.taskViewModel?.startListeningForTasks(for: user)
                     }
                     
                 case .failure(let error):

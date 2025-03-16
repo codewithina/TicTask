@@ -8,14 +8,12 @@
 import SwiftUI
 
 class RewardViewModel: ObservableObject {
-    static let shared = RewardViewModel()
     var authViewModel: AuthViewModel?
+    var notificationViewModel: NotificationViewModel?
     
     @Published var availableRewards: [Reward] = []
     @Published var createdRewards: [Reward] = []
     @Published var errorMessage: String?
-    
-    var notificationViewModel: NotificationViewModel?
     
     func addReward(title: String, description: String, xpCost: Int, iconName: String, colorHex: String, createdBy: String, assignedTo: [String]) {
         let newReward = Reward(

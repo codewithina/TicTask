@@ -31,6 +31,7 @@ struct TicTaskApp: App {
                         rewardViewModel.authViewModel = authViewModel
                         taskViewModel.notificationViewModel = notificationViewModel
                         taskViewModel.authViewModel = authViewModel
+                        authViewModel.taskViewModel = taskViewModel
                     }
         }
     }

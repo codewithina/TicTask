@@ -9,7 +9,6 @@ import SwiftUI
 import FirebaseFirestore
 
 class TaskViewModel: ObservableObject {
-    static let shared = TaskViewModel()
     var notificationViewModel: NotificationViewModel?
     var authViewModel: AuthViewModel?
     
