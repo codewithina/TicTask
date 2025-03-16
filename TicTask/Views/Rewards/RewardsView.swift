@@ -10,6 +10,9 @@ import SwiftUI
 struct RewardsView: View {
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
+    
+    @State private var showConfirmation = false
+    @State private var selectedReward: Reward?
 
     var body: some View {
         NavigationStack {
@@ -49,9 +52,8 @@ struct RewardsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                             Button(action: {
-                                if let userID = authViewModel.user?.id {
-                                    rewardViewModel.redeemReward(reward: reward, userID: userID)
-                                }
+                                selectedReward = reward
+                                showConfirmation = true
                             }) {
                                 Text("Köp")
                                     .padding(.horizontal, 12)
@@ -71,9 +73,24 @@ struct RewardsView: View {
                     rewardViewModel.startListeningForRewards(for: userID)
                 }
             }
+            .confirmationDialog("Är du säker att du vill köpa denna belöning?",
+                                isPresented: $showConfirmation,
+                                titleVisibility: .visible) {
+                Button("Ja, köp", role: .destructive) {
+                    if let userID = authViewModel.user?.id, let reward = selectedReward {
+                        rewardViewModel.redeemReward(reward: reward, userID: userID)
+                    }
+                }
+                Button("Avbryt", role: .cancel) {}
+            } message: {
+                if let reward = selectedReward {
+                    Text("\(reward.title) kostar \(reward.xpCost) XP.")
+                }
+            }
         }
     }
 }
+
 
 
 #Preview {
