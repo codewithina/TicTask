@@ -90,6 +90,33 @@ struct ProfileView: View {
                                 }
                             }
                         }
+                    } else {
+                        Section(
+                            header: HStack {
+                                Text("Mina föräldrar")
+                                Spacer()
+                                /* Add if childrne need to add parents
+                                 Button(action: {
+                                 // Add parent, create function
+                                 }) {
+                                 Image(systemName: "plus")
+                                 .foregroundColor(.blue)
+                                 }*/
+                            }
+                        ) {
+                            if let parents = authViewModel.user?.parentIDs, !parents.isEmpty {
+                                ForEach(parents, id: \.self) { parentID in
+                                    VStack(alignment: .leading) {
+                                        Text(authViewModel.parentNames[parentID] ?? "Förälder")
+                                            .font(.body)
+                                    }
+                                    .padding(.vertical, 5)
+                                }
+                            } else {
+                                Text("Inga föräldrar kopplade.")
+                                    .foregroundColor(.gray)
+                            }
+                        }
                     }
                 }
                 
