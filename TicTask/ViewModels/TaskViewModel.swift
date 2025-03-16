@@ -123,11 +123,10 @@ class TaskViewModel: ObservableObject {
     
     func startListeningForTasks(for user: User) {
         if isListening {
-            print("🟡 Redan lyssnar, avbryter ytterligare lyssning")
             return
         }
         isListening = true
-        
+
         if let userID = user.id {
             TaskService.shared.listenForTasks(for: userID) { newTasks in
                 DispatchQueue.main.async {
@@ -137,8 +136,9 @@ class TaskViewModel: ObservableObject {
         } else {
             print("🚨 `user.id` är nil – kan inte lyssna på uppgifter")
         }
-        
+
         if user.role == "parent", let children = user.children {
+            print("📡 Startar lyssnare för barnens uppgifter...")
             for childID in children {
                 TaskService.shared.listenForTasks(for: childID) { newTasks in
                     DispatchQueue.main.async {
@@ -148,7 +148,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func fetchTaskXPAndUpdateUser(taskID: String) {
         let taskRef = Firestore.firestore().collection("tasks").document(taskID)
         
@@ -161,7 +161,6 @@ class TaskViewModel: ObservableObject {
             guard let data = snapshot?.data(),
                   let assignedTo = data["assignedTo"] as? String,
                   let xpReward = data["xpReward"] as? Int else {
-                print("🔴 Kunde inte hämta uppgiftens XP eller assignedTo")
                 return
             }
             
