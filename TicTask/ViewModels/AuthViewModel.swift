@@ -14,6 +14,7 @@ class AuthViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private var childrenListeners: [ListenerRegistration] = []
     private var userListener: ListenerRegistration?
+    private var parentListeners: [ListenerRegistration] = []
     
     @Published var user: User?
     @Published var isAuthenticated: Bool = false
@@ -39,7 +40,7 @@ class AuthViewModel: ObservableObject {
                     }
                     
                     if user.role == "child" {
-                        self.fetchParentNames()
+                        self.loadAndListenToParents(for: user)
                     }
                     
                     if user.role == "parent" || user.role == "child" {
@@ -73,7 +74,7 @@ class AuthViewModel: ObservableObject {
                     }
                     
                     if user.role == "child" {
-                        self.fetchParentNames()
+                        self.loadAndListenToParents(for: user)
                     }
                     
                     if user.role == "parent" || user.role == "child" {
@@ -112,30 +113,55 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func fetchParentNames() {
-        guard let parents = user?.parentIDs, !parents.isEmpty else { return }
+    
+    func loadAndListenToParents(for user: User) {
+        stopListeningForParentUpdates()
         
-        let group = DispatchGroup()
+        guard let parentIDs = user.parentIDs, !parentIDs.isEmpty else {
+            print("🚨 Inga föräldrar att lyssna på.")
+            return
+        }
         
-        for parentID in parents {
-            group.enter()
-            Firestore.firestore().collection("users").document(parentID).getDocument { snapshot, error in
-                if let data = snapshot?.data(), let name = data["name"] as? String {
-                    DispatchQueue.main.async {
-                        self.parentNames[parentID] = name
+        parentNames.removeAll()
+        
+        for parentID in parentIDs {
+            let listener = db.collection("users").document(parentID)
+                .addSnapshotListener { [weak self] snapshot, error in
+                    guard let self = self else { return }
+                    
+                    if let error = error {
+                        print("🔴 Fel vid lyssning på förälder \(parentID): \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let data = snapshot?.data(), !data.isEmpty else {
+                        print("⚠️ Ingen data hittades för förälder \(parentID)")
+                        return
+                    }
+                    
+                    print("📢 Hämtade data för \(parentID): \(data)")
+                    
+                    if let name = data["name"] as? String {
+                        DispatchQueue.main.async {
+                            self.parentNames[parentID] = name
+                            print("✅ Uppdaterat föräldernamn för \(parentID): \(name)")
+                        }
                     }
                 }
-                group.leave()
-            }
+            
+            parentListeners.append(listener)
         }
-        
-        group.notify(queue: .main) {
-            print("✅ Alla föräldrars namn har hämtats: \(self.parentNames)")
+    }
+    func stopListeningForParentUpdates() {
+        for listener in parentListeners {
+            listener.remove()
         }
+        parentListeners.removeAll()
+        print("🛑 Stoppade alla föräldralyssnare.")
     }
     
     func startListeningForUserChanges() {
-        guard let currentUser = user, let userID = user?.id else {
+        guard let userID = user?.id else {
             print("🚨 Ingen användare inloggad, kan inte starta lyssnaren.")
             return
         }
@@ -146,23 +172,23 @@ class AuthViewModel: ObservableObject {
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self, let data = snapshot?.data() else { return }
 
-                let newXP = data["xp"] as? Int ?? 0
+                let updatedUser = User(
+                    id: userID,
+                    name: data["name"] as? String ?? "Okänt namn",
+                    email: data["email"] as? String ?? "Ingen e-post",
+                    role: data["role"] as? String ?? "unknown",
+                    xp: data["xp"] as? Int ?? 0,
+                    parentIDs: data["parentIDs"] as? [String] ?? [],
+                    children: data["children"] as? [String] ?? []
+                )
 
                 DispatchQueue.main.async {
-                    self.user = User(
-                        id: currentUser.id,
-                        name: currentUser.name,
-                        email: currentUser.email,
-                        role: currentUser.role,
-                        xp: newXP,
-                        parentIDs: currentUser.parentIDs,
-                        children: currentUser.children
-                    )
-
-                    print("📢 Uppdaterad XP: \(self.user?.xp ?? 0)")
+                    self.user = updatedUser
+                    print("📢 Användarens data uppdaterad: \(self.user?.name ?? "Okänt namn")")
                 }
             }
     }
+
     
     func addExistingChildByID(childID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let parentID = user?.id else {
@@ -179,10 +205,12 @@ class AuthViewModel: ObservableObject {
                 return
             }
             
-            guard let data = document?.data(), let childName = data["name"] as? String else {
+           // guard let data = document?.data(), let childName = data["name"] as? String
+            guard let data = document?.data(), data["name"] as? String != nil else {
                 completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Barn-ID hittades inte."])))
                 return
             }
+
 
             let batch = self.db.batch()
             
