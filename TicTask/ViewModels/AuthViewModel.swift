@@ -90,7 +90,7 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func logout() {
+    func logout(completion: @escaping (Result<Void, Error>) -> Void) {
         authService.logout { result in
             DispatchQueue.main.async {
                 switch result {
@@ -102,9 +102,11 @@ class AuthViewModel: ObservableObject {
                     self.user = nil
                     self.childrenUsers = []
                     self.isAuthenticated = false
+                    completion(.success(()))
                 case .failure(let error):
                     print("❌ Utloggning misslyckades: \(error.localizedDescription)")
                     self.errorMessage = "Misslyckades att logga ut: \(error.localizedDescription)"
+                    completion(.failure(error))
                 }
             }
         }
