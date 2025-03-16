@@ -129,10 +129,11 @@ struct AddTaskView: View {
         }
         
         if user.role == "child" {
-            taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: userID, iconName: selectedIcon, colorHex: selectedColor)
+            let parentIDs = user.parentIDs ?? []
+            taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: userID, parentIDs: parentIDs, iconName: selectedIcon, colorHex: selectedColor)
         } else if user.role == "parent", let child = selectedChild {
             if let childID = child.id {
-                taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: childID, iconName: selectedIcon, colorHex: selectedColor)
+                taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: childID, parentIDs: [], iconName: selectedIcon, colorHex: selectedColor)
             } else {
                 print("🚨 Fel: child.id är nil")
             }

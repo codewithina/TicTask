@@ -32,6 +32,21 @@ class AuthViewModel: ObservableObject {
                     print("✅ Registrering lyckades!")
                     self.user = user
                     self.isAuthenticated = true
+                    
+                    if user.role == "parent" {
+                        self.loadAndListenToChildren(for: user)
+                    }
+                    
+                    if user.role == "child" {
+                        self.fetchParentNames()
+                    }
+                    
+                    if user.role == "parent" || user.role == "child" {
+                        print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
+                        self.startListeningForUserChanges()
+                        TaskViewModel.shared.startListeningForTasks(for: user)
+                    }
+                    
                 case .failure(let error):
                     print("🔴 Registrering misslyckades: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription

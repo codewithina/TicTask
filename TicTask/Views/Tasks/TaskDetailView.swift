@@ -30,7 +30,7 @@ struct TaskDetailView: View {
             ZStack {
                 if !task.isCompleted {
                     Button(action: {
-                        taskViewModel.markTaskAsCompleted(taskID: task.id)
+                        taskViewModel.markTaskAsCompleted(task: task)
                         dismiss()
                     }) {
                         Text("Markera som Klar")

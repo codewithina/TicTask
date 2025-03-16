@@ -9,6 +9,7 @@ import SwiftUI
 
 class RewardViewModel: ObservableObject {
     static let shared = RewardViewModel()
+    var authViewModel: AuthViewModel?
     
     @Published var availableRewards: [Reward] = []
     @Published var createdRewards: [Reward] = []
@@ -66,6 +67,13 @@ class RewardViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Reward inlöst!")
+                    
+                    guard let user = self.authViewModel?.user else {
+                        return
+                    }
+                    
+                    self.notificationViewModel?.sendNotification(to: reward.createdBy, message: "\(user.name) har köpt en belöning: \(reward.title)")
+
                     self.loadRewards(for: userID)
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription

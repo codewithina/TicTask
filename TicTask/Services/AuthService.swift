@@ -12,7 +12,7 @@ class AuthService {
     static let shared = AuthService()
     private let auth = Auth.auth()
     private let db = Firestore.firestore()
-
+    
     // Register new user and send to Firestore
     func registerUser(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?, completion: @escaping (Result<User, Error>) -> Void) {
         auth.createUser(withEmail: email, password: password) { result, error in
@@ -21,28 +21,43 @@ class AuthService {
                 return
             }
             guard let userID = result?.user.uid else { return }
-
+            
             var userData: [String: Any] = [
                 "name": name,
                 "email": email,
                 "role": role
             ]
-
+            
             if role == "child" {
                 userData["xp"] = 0
                 userData["parentIDs"] = parentIDs ?? []
             } else if role == "parent" {
                 userData["children"] = children ?? []
             }
-
+            
             self.db.collection("users").document(userID).setData(userData) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
                     let user = User(id: userID, name: name, email: email, role: role, xp: role == "child" ? 0 : nil,  parentIDs: parentIDs ?? [], children: children ?? [])
-
+                    
+                    let notificationRef = self.db.collection("users").document(userID).collection("notifications")
+                    
+                    let welcomeNotification: [String: Any] = [
+                        "message": "Välkommen till TicTask!",
+                        "timestamp": Timestamp(date: Date())
+                    ]
+                    
+                    notificationRef.addDocument(data: welcomeNotification) { error in
+                        if let error = error {
+                            print("🔴 Misslyckades att skapa notiscollection: \(error.localizedDescription)")
+                        } else {
+                            print("✅ Notiscollection skapad för \(userID)")
+                        }
+                    }
+                    
                     let batch = self.db.batch()
-
+                    
                     // If child adds one or more parents during registration → Update parents `children`
                     if let parentIDs = parentIDs {
                         for parentID in parentIDs {
@@ -51,7 +66,7 @@ class AuthService {
                             print("🟢 Förälderns barnlista uppdaterad i Firestore: \(parentID)")
                         }
                     }
-
+                    
                     // If parent adds one or more children during registration → Update child's `parentIDs`
                     if let children = children {
                         for childID in children {
@@ -60,7 +75,7 @@ class AuthService {
                             print("🟢 Barnets föräldralista uppdaterad i Firestore: \(childID)")
                         }
                     }
-
+                    
                     batch.commit { error in
                         if let error = error {
                             print("🔴 Firestore batch-uppdatering misslyckades: \(error.localizedDescription)")
@@ -74,8 +89,8 @@ class AuthService {
             }
         }
     }
-
-
+    
+    
     // Login user and fetch Firestore-data
     func login(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
         auth.signIn(withEmail: email, password: password) { result, error in
@@ -84,7 +99,7 @@ class AuthService {
                 return
             }
             guard let firebaseUser = result?.user else { return }
-
+            
             // Fetch user data from Firestore
             self.db.collection("users").document(firebaseUser.uid).getDocument { snapshot, error in
                 if let error = error {
@@ -108,7 +123,7 @@ class AuthService {
             }
         }
     }
-
+    
     // Logout user
     func logout(completion: @escaping (Result<Void, Error>) -> Void) {
         do {
