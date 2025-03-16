@@ -56,20 +56,26 @@ struct TaskListView: View {
                                     Text(task.title)
                                         .font(.headline)
                                         .lineLimit(1)
-
+                                    
                                     if isParent {
                                         Text("Barn: \(authViewModel.childrenUsers.first(where: { $0.id == task.assignedTo })?.name ?? "Okänt namn")")
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
                                     }
-
+                                    
                                     Text(task.description)
                                         .font(.subheadline)
                                         .lineLimit(2)
-
-                                    Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
-                                        .font(.subheadline)
-                                        .foregroundColor(.red)
+                                    
+                                    if task.isCompleted {
+                                        Text("Uppgiften klar! 🎉")
+                                            .font(.subheadline)
+                                            .foregroundColor(.green)
+                                    } else {
+                                        Text("Deadline: \(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")")
+                                            .font(.subheadline)
+                                            .foregroundColor(.red)
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
