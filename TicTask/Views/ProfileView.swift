@@ -10,6 +10,10 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     
+    @State private var showAddChildPopup = false
+    @State private var childID = ""
+    @State private var errorMessage: String?
+    
     var isParent: Bool {
         authViewModel.user?.role == "parent"
     }
@@ -38,8 +42,8 @@ struct ProfileView: View {
                 }
                 .padding(.bottom, 20)
                 
+                // XP-sektion
                 Form {
-                    
                     Section {
                         Text("\(authViewModel.user?.xp ?? 0) XP")
                             .font(.largeTitle)
@@ -47,14 +51,13 @@ struct ProfileView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
-                    
                     if isParent {
                         Section(
                             header: HStack {
                                 Text("Mina barn")
                                 Spacer()
                                 Button(action: {
-                                    // Add children, create function
+                                    showAddChildPopup = true
                                 }) {
                                     Image(systemName: "plus")
                                         .foregroundColor(.blue)
@@ -66,38 +69,14 @@ struct ProfileView: View {
                                     .foregroundColor(.gray)
                             } else {
                                 ForEach(authViewModel.childrenUsers, id: \.id) { child in
-                                    VStack(alignment: .leading) {
+                                    HStack {
                                         Text(child.name)
                                             .font(.body)
+                                        
+                                        Spacer()
                                     }
                                     .padding(.vertical, 5)
                                 }
-                            }
-                        }
-                    } else {
-                        Section(
-                            header: HStack {
-                                Text("Mina föräldrar")
-                                Spacer()
-                                Button(action: {
-                                    // Add parent, create function
-                                }) {
-                                    Image(systemName: "plus")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        ) {
-                            if let parents = authViewModel.user?.parentIDs, !parents.isEmpty {
-                                ForEach(parents, id: \.self) { parentID in
-                                    VStack(alignment: .leading) {
-                                        Text(authViewModel.parentNames[parentID] ?? "Förälder")
-                                            .font(.body)
-                                    }
-                                    .padding(.vertical, 5)
-                                }
-                            } else {
-                                Text("Inga föräldrar kopplade.")
-                                    .foregroundColor(.gray)
                             }
                         }
                     }
@@ -105,9 +84,34 @@ struct ProfileView: View {
                 
                 Spacer()
             }
+            .alert("Lägg till barn via ID", isPresented: $showAddChildPopup) {
+                TextField("Barnets ID", text: $childID)
+                Button("Lägg till") {
+                    authViewModel.addExistingChildByID(childID: childID) { result in
+                        switch result {
+                        case .success():
+                            print("✅ Barn tillagt!")
+                        case .failure(let error):
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                    childID = ""
+                    showAddChildPopup = false
+                }
+                Button("Avbryt", role: .cancel) {}
+            } message: {
+                Text("Skriv in barnets unika ID för att koppla det till din profil.")
+            }
+            
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding()
+            }
         }
     }
 }
+
 
 
 #Preview {
