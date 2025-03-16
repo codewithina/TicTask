@@ -39,7 +39,7 @@ struct AddTaskView: View {
                         .frame(minHeight: 100)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.2)))
                     
-                    DatePicker("Deadline", selection: $deadline, displayedComponents: .date)
+                    DatePicker("Deadline", selection: $deadline, in: Date()..., displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
                     
                     Stepper("XP Belöning: \(xpReward)", value: $xpReward, in: 5...50, step: 5)
