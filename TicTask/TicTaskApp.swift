@@ -29,6 +29,7 @@ struct TicTaskApp: App {
                     .onAppear {
                         rewardViewModel.notificationViewModel = notificationViewModel
                         taskViewModel.notificationViewModel = notificationViewModel
+                        taskViewModel.authViewModel = authViewModel
                     }
         }
     }
