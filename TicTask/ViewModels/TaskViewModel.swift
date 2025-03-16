@@ -37,15 +37,15 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Läxa tillagd!")
-
+                    
                     guard let notificationViewModel = self.notificationViewModel else {
-                        print("❌ `notificationViewModel` är nil! Kan inte skicka notiser.")
                         return
                     }
-
-                    //Change the creatorname from id to name
-                    let creatorName = createdBy
-
+                    guard let user = self.authViewModel?.user else {
+                        return
+                    }
+                    let creatorName = user.name
+                    
                     // If parent adds a task  → Sen notification to child
                     if createdBy != assignedTo {
                         print("📩 Skickar notis till barnet: \(assignedTo)")
@@ -54,7 +54,7 @@ class TaskViewModel: ObservableObject {
                             message: "Din förälder har lagt till en ny läxa: \(title)"
                         )
                     }
-
+                    
                     // If child adds a task  → Sen notification to parent
                     if createdBy == assignedTo {
                         if parentIDs.isEmpty {
@@ -69,7 +69,7 @@ class TaskViewModel: ObservableObject {
                             }
                         }
                     }
-
+                    
                 case .failure(let error):
                     print("🔴 Fel vid tillägg av läxa: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
@@ -77,17 +77,44 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
-
-
     
-    func markTaskAsCompleted(taskID: String) {
-        TaskService.shared.updateTaskStatus(taskID: taskID, status: "completed") { result in
+    func markTaskAsCompleted(task: Task) {
+        TaskService.shared.updateTaskStatus(taskID: task.id, status: "completed") { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
                     print("✅ Läxa markerad som klar!")
-                    self.fetchTaskXPAndUpdateUser(taskID: taskID)
+                    self.fetchTaskXPAndUpdateUser(taskID: task.id)
+                    
+                    guard let user = self.authViewModel?.user else {
+                        return
+                    }
+                    let userName = user.name
+                    
+                    // If child complete task → Send notification to parents
+                    if user.id == task.assignedTo {
+                        let parentIDs = user.parentIDs ?? []
+                        if parentIDs.isEmpty {
+                            print("⚠️ Barnet har inga kopplade föräldrar. Ingen notis skickas.")
+                        } else {
+                            for parentID in parentIDs {
+                                print("📩 Skickar notis till förälder: \(parentID)")
+                                self.notificationViewModel?.sendNotification(
+                                    to: parentID,
+                                    message: "\(userName) har markerat läxan \"\(task.title)\" som klar!"
+                                )
+                            }
+                        }
+                    }
+                    
+                    // If parent complete task → Send notification to child
+                    if user.id == task.createdBy {
+                        print("📩 Skickar notis till barnet: \(task.assignedTo)")
+                        self.notificationViewModel?.sendNotification(
+                            to: task.assignedTo,
+                            message: "\(userName) har markerat läxan \"\(task.title)\" som klar!"
+                        )
+                    }
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
