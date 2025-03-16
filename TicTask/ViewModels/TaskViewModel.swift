@@ -10,13 +10,15 @@ import FirebaseFirestore
 
 class TaskViewModel: ObservableObject {
     static let shared = TaskViewModel()
+    var notificationViewModel: NotificationViewModel?
+    var authViewModel: AuthViewModel?
     
     @Published var tasks: [Task] = []
     @Published var errorMessage: String?
     @Published var childrenTasks: [Task] = []
     @Published var isListening: Bool = false
     
-    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, iconName: String, colorHex: String) {
+    func addTask(title: String, description: String, deadline: Date?, xpReward: Int, createdBy: String, assignedTo: String, parentIDs: [String], iconName: String, colorHex: String) {
         let newTask = Task(
             id: UUID().uuidString,
             title: title,
@@ -35,6 +37,39 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Läxa tillagd!")
+
+                    guard let notificationViewModel = self.notificationViewModel else {
+                        print("❌ `notificationViewModel` är nil! Kan inte skicka notiser.")
+                        return
+                    }
+
+                    //Change the creatorname from id to name
+                    let creatorName = createdBy
+
+                    // If parent adds a task  → Sen notification to child
+                    if createdBy != assignedTo {
+                        print("📩 Skickar notis till barnet: \(assignedTo)")
+                        notificationViewModel.sendNotification(
+                            to: assignedTo,
+                            message: "Din förälder har lagt till en ny läxa: \(title)"
+                        )
+                    }
+
+                    // If child adds a task  → Sen notification to parent
+                    if createdBy == assignedTo {
+                        if parentIDs.isEmpty {
+                            print("⚠️ Barnet har inga kopplade föräldrar. Ingen notis skickas.")
+                        } else {
+                            for parentID in parentIDs {
+                                print("📩 Skickar notis till förälder: \(parentID)")
+                                notificationViewModel.sendNotification(
+                                    to: parentID,
+                                    message: "\(creatorName) har lagt till en ny läxa: \(title)"
+                                )
+                            }
+                        }
+                    }
+
                 case .failure(let error):
                     print("🔴 Fel vid tillägg av läxa: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
@@ -42,6 +77,9 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
+
+
+
     
     func markTaskAsCompleted(taskID: String) {
         TaskService.shared.updateTaskStatus(taskID: taskID, status: "completed") { result in
