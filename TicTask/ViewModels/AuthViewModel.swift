@@ -152,7 +152,7 @@ class AuthViewModel: ObservableObject {
                         name: currentUser.name,
                         email: currentUser.email,
                         role: currentUser.role,
-                        xp: newXP,  // 🟢 Uppdaterad XP
+                        xp: newXP,
                         parentIDs: currentUser.parentIDs,
                         children: currentUser.children
                     )
@@ -160,6 +160,63 @@ class AuthViewModel: ObservableObject {
                     print("📢 Uppdaterad XP: \(self.user?.xp ?? 0)")
                 }
             }
+    }
+    
+    func addExistingChildByID(childID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let parentID = user?.id else {
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Ingen inloggad förälder."])))
+            return
+        }
+
+        let childRef = db.collection("users").document(childID)
+        let parentRef = db.collection("users").document(parentID)
+
+        childRef.getDocument { document, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = document?.data(), let childName = data["name"] as? String else {
+                completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Barn-ID hittades inte."])))
+                return
+            }
+
+            let batch = self.db.batch()
+            
+            batch.updateData(["parentIDs": FieldValue.arrayUnion([parentID])], forDocument: childRef)
+            batch.updateData(["children": FieldValue.arrayUnion([childID])], forDocument: parentRef)
+
+            batch.commit { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    print("✅ Barn kopplades till förälder i Firestore!")
+                    completion(.success(()))
+                }
+            }
+        }
+    }
+    
+    func removeChild(childID: String) {
+        guard let parentID = user?.id else { return }
+
+        let childRef = db.collection("users").document(childID)
+        let parentRef = db.collection("users").document(parentID)
+
+        let batch = db.batch()
+
+        batch.updateData(["parentIDs": FieldValue.arrayRemove([parentID])], forDocument: childRef)
+        batch.updateData(["children": FieldValue.arrayRemove([childID])], forDocument: parentRef)
+
+        batch.commit { error in
+            if let error = error {
+                print("❌ Misslyckades att ta bort barnet: \(error.localizedDescription)")
+            } else {
+                print("✅ Barn borttaget!")
+                self.childrenUsers.removeAll { $0.id == childID }
+            }
+        }
     }
     
     func loadAndListenToChildren(for user: User) {
