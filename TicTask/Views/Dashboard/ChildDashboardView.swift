@@ -53,12 +53,3 @@ struct ChildDashboardView: View {
         }.first
     }
 }
-
-
-
-#Preview {
-    ChildDashboardView()
-        .environmentObject(AuthViewModel())
-        .environmentObject(TaskViewModel.shared)
-        .environmentObject(RewardViewModel.shared)
-}

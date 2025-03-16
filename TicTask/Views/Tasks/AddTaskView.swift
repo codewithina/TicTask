@@ -142,12 +142,3 @@ struct AddTaskView: View {
         showAddTaskView = false
     }
 }
-
-
-#Preview {
-    AddTaskView(showAddTaskView: .constant(true))
-        .environmentObject(TaskViewModel.shared)
-        .environmentObject(AuthViewModel())
-}
-
-
