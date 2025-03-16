@@ -127,7 +127,7 @@ struct TaskDetailView: View {
             if showXP {
                 Text("+\(task.xpReward) XP")
                     .font(.largeTitle.bold())
-                    .foregroundColor(.yellow)
+                    .foregroundColor(Color(.yellow).opacity(0.7))
                     .transition(.scale.combined(with: .opacity))
             }
         }
@@ -135,12 +135,12 @@ struct TaskDetailView: View {
 }
 
 struct StarExplosionView: View {
-    @State private var starOffsets: [CGSize] = Array(repeating: .zero, count: 6)
-    @State private var starOpacities: [Double] = Array(repeating: 1, count: 6)
+    @State private var starOffsets: [CGSize] = Array(repeating: .zero, count: 15)
+    @State private var starOpacities: [Double] = Array(repeating: 1, count: 15)
 
     var body: some View {
         ZStack {
-            ForEach(0..<6, id: \.self) { index in
+            ForEach(0..<15, id: \.self) { index in
                 Image(systemName: "star.fill")
                     .resizable()
                     .scaledToFit()
@@ -159,6 +159,6 @@ struct StarExplosionView: View {
     }
 
     func randomOffset() -> CGSize {
-        return CGSize(width: CGFloat.random(in: -50...50), height: CGFloat.random(in: -50...50))
+        return CGSize(width: CGFloat.random(in: -100...100), height: CGFloat.random(in: -100...100))
     }
 }
