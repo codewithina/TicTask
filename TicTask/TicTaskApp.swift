@@ -28,6 +28,7 @@ struct TicTaskApp: App {
                     .environmentObject(notificationViewModel)
                     .onAppear {
                         rewardViewModel.notificationViewModel = notificationViewModel
+                        rewardViewModel.authViewModel = authViewModel
                         taskViewModel.notificationViewModel = notificationViewModel
                         taskViewModel.authViewModel = authViewModel
                     }
