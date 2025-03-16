@@ -33,6 +33,12 @@ struct ProfileView: View {
                         ParentListView(authViewModel: authViewModel)
                     }
                     
+                    Section {
+                        NavigationLink(destination: ChangeNamePasswordView()) {
+                            Text("Ändra namn & lösenord")
+                        }
+                    }
+                    
                     LogoutButtonView(showLogoutConfirmation: $showLogoutConfirmation)
                 }
                 
