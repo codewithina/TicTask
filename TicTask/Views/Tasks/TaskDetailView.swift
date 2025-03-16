@@ -78,7 +78,7 @@ struct TaskDetailView: View {
                         .padding(.horizontal)
                     }
 
-                    if !isCompleted {
+                    if !task.isCompleted {
                         Button(action: {
                             withAnimation {
                                 isCompleted = true
