@@ -11,6 +11,7 @@ struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     
     @State private var showAddChildPopup = false
+    @State private var showLogoutConfirmation = false
     @State private var childID = ""
     @State private var errorMessage: String?
     
@@ -21,81 +22,23 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                VStack {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue.opacity(0.3))
-                            .frame(width: 110, height: 110)
-                        
-                        Image(systemName: "person.circle.fill") // Placeholder avatar
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.blue)
-                    }
-                    .padding(.top, 20)
-                    
-                    Text(authViewModel.user?.name ?? "Okänt namn")
-                        .font(.title2)
-                        .bold()
-                        .padding(.top, 5)
-                }
-                .padding(.bottom, 20)
+                ProfileHeaderView(userName: authViewModel.user?.name ?? "Okänt namn")
                 
-                // XP-sektion
                 Form {
-                    Section {
-                        Text("\(authViewModel.user?.xp ?? 0) XP")
-                            .font(.largeTitle)
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
+                    XPSectionView(xp: authViewModel.user?.xp ?? 0)
                     
                     if isParent {
-                        Section(
-                            header: HStack {
-                                Text("Mina barn")
-                                Spacer()
-                                Button(action: {
-                                    showAddChildPopup = true
-                                }) {
-                                    Image(systemName: "plus")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        ) {
-                            if authViewModel.childrenUsers.isEmpty {
-                                Text("Inga barn kopplade.")
-                                    .foregroundColor(.gray)
-                            } else {
-                                ForEach(authViewModel.childrenUsers, id: \.id) { child in
-                                    HStack {
-                                        Text(child.name)
-                                            .font(.body)
-                                        Spacer()
-                                    }
-                                    .padding(.vertical, 5)
-                                    .swipeActions(edge: .trailing) {
-                                        Button(role: .destructive) {
-                                            if let childID = child.id {
-                                                authViewModel.removeChild(childID: childID)
-                                            } else {
-                                                print("⚠️ Error: child.id är nil!")
-                                            }
-                                        } label: {
-                                            Label("Ta bort", systemImage: "trash")
-                                        }
-                                    }
-                                    
-                                }
-                            }
-                        }
+                        ChildrenListView(authViewModel: authViewModel, showAddChildPopup: $showAddChildPopup)
+                    } else {
+                        ParentListView(authViewModel: authViewModel)
                     }
+                    
+                    LogoutButtonView(showLogoutConfirmation: $showLogoutConfirmation)
                 }
                 
                 Spacer()
             }
-            .alert("Lägg till barn via ID", isPresented: $showAddChildPopup) {
+            .alert("Lägg till barn via ID", isPresented: $showAddChildPopup, actions: {
                 TextField("Barnets ID", text: $childID)
                 Button("Lägg till") {
                     authViewModel.addExistingChildByID(childID: childID) { result in
@@ -110,15 +53,25 @@ struct ProfileView: View {
                     showAddChildPopup = false
                 }
                 Button("Avbryt", role: .cancel) {}
-            } message: {
+            }, message: {
                 Text("Skriv in barnets unika ID för att koppla det till din profil.")
-            }
+            })
             
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            }
+            .alert("Logga ut", isPresented: $showLogoutConfirmation, actions: {
+                Button("Ja, logga ut", role: .destructive) {
+                    authViewModel.logout { result in
+                        switch result {
+                        case .success():
+                            print("✅ Användaren loggades ut.")
+                        case .failure(let error):
+                            print("❌ Misslyckades att logga ut: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                Button("Avbryt", role: .cancel) {}
+            }, message: {
+                Text("Är du säker på att du vill logga ut?")
+            })
         }
     }
 }
