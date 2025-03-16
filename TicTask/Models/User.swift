@@ -10,7 +10,7 @@ import FirebaseFirestore
 
 struct User: Identifiable, Codable {
     @DocumentID var id: String?
-    let name: String
+    var name: String
     let email: String
     let role: String  // "child" or "parent"
     let xp: Int?
