@@ -15,6 +15,7 @@ struct TaskDetailView: View {
     @State private var isCompleted = false
     @State private var showStars = false
     @State private var showXP = false
+    @State private var showDeleteConfirm = false
     
     var body: some View {
         ZStack {
@@ -134,6 +135,30 @@ struct TaskDetailView: View {
                     .animation(.easeOut(duration: 0.5), value: showStars)
             }
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button(action: {
+                    print("Redigera uppgift")
+                }) {
+                    Image(systemName: "square.and.pencil")
+                }
+
+                Button(action: {
+                    showDeleteConfirm = true
+                    print("Ta bort uppgift")
+                }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+            }
+        }
+        .confirmationDialog("Är du säker på att du vill ta bort uppgiften?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Ta bort", role: .destructive) {
+                taskViewModel.deleteTask(task: task)
+                dismiss()
+            }
+            Button("Avbryt", role: .cancel) { }
+        }
     }
 }
 
@@ -174,20 +199,3 @@ struct StarExplosionView: View {
         )
     }
 }
-
-#Preview {
-    TaskDetailView(task: Task(
-        id: "1",
-        title: "Matteprov",
-        description: "Plugga inför matteprovet på torsdag.",
-        deadline: Date().addingTimeInterval(86400), // En dag framåt
-        xpReward: 50,
-        status: "pending",
-        assignedTo: "childID123",
-        createdBy: "parentID123",
-        iconName: "book.fill",
-        colorHex: "#CCCCCC"
-    ))
-    .environmentObject(TaskViewModel()) // För att injicera taskViewModel
-}
-
