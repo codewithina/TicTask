@@ -77,6 +77,38 @@ class TaskViewModel: ObservableObject {
         }
     }
     
+    func deleteTask(task: Task) {
+        TaskService.shared.deleteTask(taskID: task.id) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.tasks.removeAll { $0.id == task.id }
+                    print("✅ Uppgiften har tagits bort från listan!")
+
+                    guard let user = self.authViewModel?.user else { return }
+                    let userName = user.name
+
+                    if user.id == task.createdBy {
+                        print("📩 Skickar notis till barnet: \(task.assignedTo)")
+                        self.notificationViewModel?.sendNotification(
+                            to: task.assignedTo,
+                            message: "\(userName) har tagit bort läxan \"\(task.title)\"."
+                        )
+                    } else {
+                        print("📩 Skickar notis till förälder: \(task.createdBy)")
+                        self.notificationViewModel?.sendNotification(
+                            to: task.createdBy,
+                            message: "\(userName) har tagit bort läxan \"\(task.title)\"."
+                        )
+                    }
+
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
     func markTaskAsCompleted(task: Task) {
         TaskService.shared.updateTaskStatus(taskID: task.id, status: "completed") { result in
             DispatchQueue.main.async {
