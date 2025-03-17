@@ -25,6 +25,18 @@ class TaskService {
         }
     }
     
+    func deleteTask(taskID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        db.collection("tasks").document(taskID).delete { error in
+            if let error = error {
+                print("🔴 Misslyckades att ta bort uppgiften: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                print("✅ Uppgift borttagen!")
+                completion(.success(()))
+            }
+        }
+    }
+    
     func updateTaskStatus(taskID: String, status: String, completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("tasks").document(taskID).updateData(["status": status]) { error in
             if let error = error {
