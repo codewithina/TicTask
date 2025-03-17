@@ -142,7 +142,7 @@ class TaskViewModel: ObservableObject {
             for childID in children {
                 TaskService.shared.listenForTasks(for: childID) { newTasks in
                     DispatchQueue.main.async {
-                        self.childrenTasks.append(contentsOf: newTasks)
+                        self.childrenTasks = newTasks
                     }
                 }
             }
