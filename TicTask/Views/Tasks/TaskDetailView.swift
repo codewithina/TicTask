@@ -142,14 +142,14 @@ struct TaskDetailView: View {
                 }) {
                     Image(systemName: "square.and.pencil")
                 }
-
-                Button(action: {
-                    showDeleteConfirm = true
-                    print("Ta bort uppgift")
-                }) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                }
+                if taskViewModel.authViewModel?.user?.role == "parent" {
+                    Button(action: {
+                        showDeleteConfirm = true
+                        print("Ta bort uppgift")
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    } }
             }
         }
         .confirmationDialog("Är du säker på att du vill ta bort uppgiften?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
@@ -192,7 +192,7 @@ struct StarExplosionView: View {
     func randomOffset() -> CGSize {
         let distance = CGFloat.random(in: 40...120)
         let angle = CGFloat.random(in: 0...(2 * .pi))
-
+        
         return CGSize(
             width: cos(angle) * distance,
             height: sin(angle) * distance
