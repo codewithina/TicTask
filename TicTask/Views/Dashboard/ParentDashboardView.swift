@@ -17,15 +17,21 @@ struct ParentDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    NotificationSection()
-                    
-                    if !authViewModel.childrenUsers.isEmpty {
-                        ChildrenProgressView(children: authViewModel.childrenUsers)
+                    DashboardCard(title: "Notiser", icon: "bell", color: "#FFC107") {
+                        NotificationSection()
+                    }
+                    DashboardCard(title: "Mina barn", icon: "person.crop.circle", color: "#4CAF50") {
+                        if !authViewModel.childrenUsers.isEmpty {
+                            ChildrenProgressView(children: authViewModel.childrenUsers)
+                        }
                     }
                     
-                    TaskOverviewView()
-                    
-                    WeeklyTaskStatsView()
+                    DashboardCard(title: "Barnens uppgifter", icon: "task", color: "#FF9800") {
+                        TaskOverviewView()
+                    }
+                    DashboardCard(title: "Veckans statistik", icon: "chart.bar", color: "#2196F3") {
+                        WeeklyTaskStatsView()
+                    }
                 }
                 .padding()
             }
