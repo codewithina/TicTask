@@ -30,6 +30,7 @@ class AuthService {
             
             if role == "child" {
                 userData["xp"] = 0
+                userData["totalXP"] = 0
                 userData["parentIDs"] = parentIDs ?? []
             } else if role == "parent" {
                 userData["children"] = children ?? []
@@ -39,7 +40,7 @@ class AuthService {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    let user = User(id: userID, name: name, email: email, role: role, xp: role == "child" ? 0 : nil,  parentIDs: parentIDs ?? [], children: children ?? [])
+                    let user = User(id: userID, name: name, email: email, role: role, xp: role == "child" ? 0 : nil, totalXP: role == "child" ? 0 : nil, parentIDs: parentIDs ?? [], children: children ?? [])
                     
                     let notificationRef = self.db.collection("users").document(userID).collection("notifications")
                     
@@ -113,6 +114,7 @@ class AuthService {
                         email: data["email"] as? String ?? "",
                         role: data["role"] as? String ?? "",
                         xp: data["xp"] as? Int ?? 0,
+                        totalXP: data["totalXP"] as? Int ?? 0,
                         parentIDs: data["parentIDs"] as? [String] ?? [],
                         children: data["children"] as? [String] ?? []
                     )
