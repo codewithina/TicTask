@@ -178,6 +178,7 @@ class AuthViewModel: ObservableObject {
                     email: data["email"] as? String ?? "Ingen e-post",
                     role: data["role"] as? String ?? "unknown",
                     xp: data["xp"] as? Int ?? 0,
+                    totalXP: data["totalXP"] as? Int ?? 0,
                     parentIDs: data["parentIDs"] as? [String] ?? [],
                     children: data["children"] as? [String] ?? []
                 )
@@ -289,6 +290,7 @@ class AuthViewModel: ObservableObject {
                         email: data["email"] as? String ?? "Ingen e-post",
                         role: data["role"] as? String ?? "unknown",
                         xp: data["xp"] as? Int ?? 0,
+                        totalXP: data["totalXP"] as? Int ?? 0,
                         parentIDs: data["parentIDs"] as? [String] ?? [],
                         children: data["children"] as? [String] ?? []
                     )
@@ -299,7 +301,7 @@ class AuthViewModel: ObservableObject {
                         } else {
                             self.childrenUsers.append(child)
                         }
-                        print("✅ Uppdaterad data för \(child.name), XP: \(child.xp ?? 0)")
+                        print("✅ Uppdaterad data för \(child.name), XP: \(child.xp ?? 0), total XP: \(child.totalXP ?? 0)")
                     }
                 }
             

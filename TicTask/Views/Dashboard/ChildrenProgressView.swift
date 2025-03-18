@@ -11,7 +11,6 @@ struct ChildrenProgressView: View {
     var children: [User]
     
     var body: some View {
-        SectionBox(title: "Mina barn") {
             VStack {
                 ForEach(children, id: \.id) { child in
                     HStack {
@@ -28,6 +27,5 @@ struct ChildrenProgressView: View {
                     .padding()
                 }
             }
-        }
     }
 }

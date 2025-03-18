@@ -18,16 +18,33 @@ struct ChildDashboardView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     if let user = authViewModel.user {
-                        XPProgressView(xp: user.xp ?? 0, maxXP: 100)
+                        XPProgressView(allTimeXP: user.totalXP ?? 0, spendableXP: user.xp ?? 0, maxXPPerLevel: 1000)
+                            .padding(.bottom, 10)
                     }
                     
-                    NotificationSection()
+                    DashboardCard(title: "Notiser", icon: "bell", color: "#FFC107") {
+                        NotificationSection()
+                    }
+                    
+                    DashboardCard(title: "Din XP & Nivå", icon: "star.fill", color: "#FF9800") {
+                        VStack {
+                            Text("All-time XP: **\(authViewModel.user?.totalXP ?? 0)**")
+                            Text("Nuvarande XP: **\(authViewModel.user?.xp ?? 0)**")
+                            //Text("Nivå: **\(calculateLevel(from: authViewModel.user?.totalXP ?? 0))**")
+                        }
+                        .font(.headline)
+                        .padding()
+                    }
                     
                     if let task = getUpcomingTask() {
-                        UpcomingTaskView(task: task)
+                        DashboardCard(title: "Nästa Uppgift", icon: "calendar", color: "#2196F3") {
+                            UpcomingTaskView(task: task)
+                        }
                     }
                     
-                    RewardsSummaryView(rewardCount: rewardViewModel.availableRewards.count)
+                    DashboardCard(title: "Belöningar", icon: "gift", color: "#4CAF50") {
+                        RewardsSummaryView(rewardCount: rewardViewModel.availableRewards.count)
+                    }
                 }
                 .padding()
             }
@@ -37,8 +54,6 @@ struct ChildDashboardView: View {
                     notificationViewModel.startListeningForNotifications(for: userID)
                     rewardViewModel.startListeningForRewards(for: userID)
                     taskViewModel.startListeningForTasks(for: user)
-                } else {
-                    print("🚨 Ingen användare inloggad eller `user.id` saknas")
                 }
             }
             .onDisappear {
@@ -53,3 +68,4 @@ struct ChildDashboardView: View {
         }.first
     }
 }
+

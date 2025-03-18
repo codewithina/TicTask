@@ -59,8 +59,10 @@ class TaskService {
             
             let currentXP = snapshot?.data()?["xp"] as? Int ?? 0
             let newXP = currentXP + xpReward
+            let alltimeXP = snapshot?.data()?["totalXP"] as? Int ?? 0
+            let newAlltimeXP = alltimeXP + xpReward
             
-            userRef.updateData(["xp": newXP]) { error in
+            userRef.updateData(["xp": newXP, "totalXP": newAlltimeXP]) { error in
                 if let error = error {
                     print("🔴 Misslyckades att uppdatera XP: \(error.localizedDescription)")
                     completion(.failure(error))
