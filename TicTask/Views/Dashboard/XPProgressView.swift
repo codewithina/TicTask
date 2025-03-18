@@ -4,39 +4,65 @@
 //
 //  Created by Ina Burström on 2025-03-14.
 //
-
 import SwiftUI
 
 struct XPProgressView: View {
-    let xp: Int
-    let maxXP: Int
+    let allTimeXP: Int   // Total XP som aldrig minskar
+    let spendableXP: Int // XP som kan användas för att köpa belöningar
+    let maxXPPerLevel: Int // XP som krävs per nivå
+
+    var currentLevel: Int {
+        return (allTimeXP / maxXPPerLevel) + 1
+    }
 
     var progress: CGFloat {
-        maxXP > 0 ? CGFloat(xp) / CGFloat(maxXP) : 0
+        let xpInCurrentLevel = allTimeXP % maxXPPerLevel
+        return CGFloat(xpInCurrentLevel) / CGFloat(maxXPPerLevel)
     }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .trim(from: 0.0, to: 0.5)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 10)
-                .frame(width: 200, height: 100)
-
-            Circle()
-                .trim(from: 0.0, to: progress / 2)
-                .stroke(Color.green, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                .frame(width: 200, height: 100)
-                .rotationEffect(.degrees(180))
-
-            VStack {
-                Text("\(xp) XP")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Text("Nivå \(max(1, (xp / maxXP) + 1))")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+        VStack(spacing: 10) {
+            // Progress Bar
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 12)
+                    .frame(width: 300, height: 20)
+                    .foregroundColor(Color.gray.opacity(0.3))
+                
+                RoundedRectangle(cornerRadius: 12)
+                    .frame(width: CGFloat(progress) * 300, height: 20)
+                    .foregroundColor(.blue)
             }
+            
+            // XP & level
+            Text("Nivå \(currentLevel) • XP: \(allTimeXP % maxXPPerLevel) / \(maxXPPerLevel)")
+                .font(.subheadline)
+                .padding(.top, 5)
+
+            HStack {
+                Image(systemName: "star.circle.fill")
+                    .foregroundColor(.yellow)
+                    .font(.title2)
+                
+                Text("Spenderbar XP: \(spendableXP)")
+                    .font(.headline)
+            }
+            .padding(.top, 5)
         }
-        .padding(.top)
+        .padding(.vertical)
     }
 }
+
+struct XPProgressView_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack {
+            XPProgressView(allTimeXP: 3200, spendableXP: 500, maxXPPerLevel: 1000)
+            XPProgressView(allTimeXP: 1500, spendableXP: 200, maxXPPerLevel: 1000)
+            XPProgressView(allTimeXP: 800, spendableXP: 100, maxXPPerLevel: 1000)
+        }
+        .padding()
+        .previewLayout(.sizeThatFits)
+    }
+}
+
+
+
