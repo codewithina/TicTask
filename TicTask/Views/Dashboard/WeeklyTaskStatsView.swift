@@ -11,7 +11,7 @@ struct WeeklyTaskStatsView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
 
     var body: some View {
-        SectionBox(title: "Veckans statistik") {
+        
             VStack {
                 Text("Slutförda uppgifter: ")
                     .font(.headline)
@@ -19,6 +19,5 @@ struct WeeklyTaskStatsView: View {
                 
                 // Create \(taskViewModel.completedTasksThisWeek.count), develop statistics etc.
             }
-        }
     }
 }

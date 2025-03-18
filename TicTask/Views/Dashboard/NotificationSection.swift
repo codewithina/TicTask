@@ -12,31 +12,18 @@ struct NotificationSection: View {
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     
     var body: some View {
-        SectionBox(title: "Senaste händelser") {
-            let notifications = notificationViewModel.notifications
-            
-            if !notifications.isEmpty {
-                ForEach(notifications) { notification in
-                    NotificationRow(notification: notification)
-                }
-            } else {
-                Text("Inga nya notiser")
-                    .foregroundColor(.gray)
-                    .padding()
-            }
-            
-           /* if !notifications.isEmpty {
-                Button("Rensa alla") {
-                    if let userID = authViewModel.user?.id {
-                        for notification in notifications {
-                            notificationViewModel.deleteNotification(for: userID, notificationID: notification.id ?? "")
-                        }
+            VStack(spacing: 8) {
+                let notifications = notificationViewModel.notifications
+                
+                if !notifications.isEmpty {
+                    ForEach(notifications) { notification in
+                        NotificationRow(notification: notification)
                     }
+                } else {
+                    Text("Inga nya notiser")
+                        .foregroundColor(.gray)
+                        .padding()
                 }
-                .foregroundColor(.red)
-                .padding(.top, 5)
-            }*/
-        }
+            }
     }
 }
-

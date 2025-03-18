@@ -11,11 +11,9 @@ struct RewardsSummaryView: View {
     var rewardCount: Int
 
     var body: some View {
-        SectionBox(title: "Belöningar tillgängliga") {
             Text("\(rewardCount) belöningar att köpa")
                 .font(.headline)
                 .foregroundColor(.blue)
                 .padding()
-        }
     }
 }

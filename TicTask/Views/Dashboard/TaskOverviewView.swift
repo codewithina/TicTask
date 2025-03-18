@@ -11,7 +11,6 @@ struct TaskOverviewView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
 
     var body: some View {
-        SectionBox(title: "Barnens uppgifter") {
             VStack {
                 ForEach(taskViewModel.tasks) { task in
                     HStack {
@@ -32,6 +31,5 @@ struct TaskOverviewView: View {
                     .padding()
                 }
             }
-        }
     }
 }
