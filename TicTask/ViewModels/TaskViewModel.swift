@@ -84,10 +84,10 @@ class TaskViewModel: ObservableObject {
                 case .success:
                     self.tasks.removeAll { $0.id == task.id }
                     print("✅ Uppgiften har tagits bort från listan!")
-
+                    
                     guard let user = self.authViewModel?.user else { return }
                     let userName = user.name
-
+                    
                     if user.id == task.createdBy {
                         print("📩 Skickar notis till barnet: \(task.assignedTo)")
                         self.notificationViewModel?.sendNotification(
@@ -101,7 +101,7 @@ class TaskViewModel: ObservableObject {
                             message: "\(userName) har tagit bort läxan \"\(task.title)\"."
                         )
                     }
-
+                    
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
@@ -139,11 +139,11 @@ class TaskViewModel: ObservableObject {
                     }
                     
                     // If parent complete task → Send notification to child
-                    if user.id == task.createdBy {
+                    if user.role == "parent" {
                         print("📩 Skickar notis till barnet: \(task.assignedTo)")
                         self.notificationViewModel?.sendNotification(
                             to: task.assignedTo,
-                            message: "\(userName) har markerat läxan \"\(task.title)\" som klar!"
+                            message: "\(user.name) har markerat läxan \"\(task.title)\" som klar!"
                         )
                     }
                 case .failure(let error):
@@ -158,7 +158,7 @@ class TaskViewModel: ObservableObject {
             return
         }
         isListening = true
-
+        
         if let userID = user.id {
             TaskService.shared.listenForTasks(for: userID) { newTasks in
                 DispatchQueue.main.async {
@@ -168,7 +168,7 @@ class TaskViewModel: ObservableObject {
         } else {
             print("🚨 `user.id` är nil – kan inte lyssna på uppgifter")
         }
-
+        
         if user.role == "parent", let children = user.children {
             print("📡 Startar lyssnare för barnens uppgifter...")
             for childID in children {
@@ -180,7 +180,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
+    
     private func fetchTaskXPAndUpdateUser(taskID: String) {
         let taskRef = Firestore.firestore().collection("tasks").document(taskID)
         
