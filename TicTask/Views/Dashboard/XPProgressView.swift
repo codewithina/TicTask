@@ -7,9 +7,9 @@
 import SwiftUI
 
 struct XPProgressView: View {
-    let allTimeXP: Int   // Total XP som aldrig minskar
-    let spendableXP: Int // XP som kan användas för att köpa belöningar
-    let maxXPPerLevel: Int // XP som krävs per nivå
+    let allTimeXP: Int
+    let spendableXP: Int
+    let maxXPPerLevel: Int
 
     var currentLevel: Int {
         return (allTimeXP / maxXPPerLevel) + 1
@@ -21,36 +21,43 @@ struct XPProgressView: View {
     }
 
     var body: some View {
-        VStack(spacing: 10) {
-            // Progress Bar
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 12)
-                    .frame(width: 300, height: 20)
-                    .foregroundColor(Color.gray.opacity(0.3))
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .trim(from: 0.0, to: progress / 2)
+                    .stroke(
+                        AngularGradient(gradient: Gradient(colors: [
+                            Color.purple.opacity(0.8),
+                            Color.blue.opacity(0.8),
+                            Color.purple.opacity(0.8)
+                        ]), center: .center),
+                        style: StrokeStyle(lineWidth: 30, lineCap: .round)
+                    )
+                    .frame(width: 220, height: 160)
+                    .rotationEffect(.degrees(180))
+                    .offset(y:30)
                 
-                RoundedRectangle(cornerRadius: 12)
-                    .frame(width: CGFloat(progress) * 300, height: 20)
-                    .foregroundColor(.blue)
+                    Text("\(currentLevel)")
+                        .font(.system(size: 50, weight: .bold))
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .offset(y: 25)
             }
-            
-            // XP & level
-            Text("Nivå \(currentLevel) • XP: \(allTimeXP % maxXPPerLevel) / \(maxXPPerLevel)")
-                .font(.subheadline)
-                .padding(.top, 5)
 
             HStack {
                 Image(systemName: "star.circle.fill")
                     .foregroundColor(.yellow)
                     .font(.title2)
                 
-                Text("Spenderbar XP: \(spendableXP)")
-                    .font(.headline)
+                Text(" \(spendableXP)")
+                    .font(.title)
             }
-            .padding(.top, 5)
+            .padding(.top, -20)
         }
         .padding(.vertical)
     }
 }
+
 
 struct XPProgressView_Previews: PreviewProvider {
     static var previews: some View {

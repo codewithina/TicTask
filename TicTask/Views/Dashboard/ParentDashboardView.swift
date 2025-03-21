@@ -17,9 +17,9 @@ struct ParentDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    DashboardCard(title: "Notiser", icon: "bell", color: "#FFC107") {
-                        NotificationSection()
-                    }
+                    
+                    NotificationSection(title: "Notiser", icon: "bell", color: "#FFC107")
+                    
                     DashboardCard(title: "Mina barn", icon: "person.crop.circle", color: "#4CAF50") {
                         if !authViewModel.childrenUsers.isEmpty {
                             ChildrenProgressView(children: authViewModel.childrenUsers)

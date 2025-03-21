@@ -22,19 +22,7 @@ struct ChildDashboardView: View {
                             .padding(.bottom, 10)
                     }
                     
-                    DashboardCard(title: "Notiser", icon: "bell", color: "#FFC107") {
-                        NotificationSection()
-                    }
-                    
-                    DashboardCard(title: "Din XP & Nivå", icon: "star.fill", color: "#FF9800") {
-                        VStack {
-                            Text("All-time XP: **\(authViewModel.user?.totalXP ?? 0)**")
-                            Text("Nuvarande XP: **\(authViewModel.user?.xp ?? 0)**")
-                            //Text("Nivå: **\(calculateLevel(from: authViewModel.user?.totalXP ?? 0))**")
-                        }
-                        .font(.headline)
-                        .padding()
-                    }
+                    NotificationSection(title: "Notiser", icon: "bell", color: "#FFC107")
                     
                     if let task = getUpcomingTask() {
                         DashboardCard(title: "Nästa Uppgift", icon: "calendar", color: "#2196F3") {
@@ -48,7 +36,15 @@ struct ChildDashboardView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Dashboard")
+            
+           /* .navigationBarItems(trailing: HStack {
+                Image(systemName: "star.circle.fill")
+                    .foregroundColor(.yellow)
+                
+                Text("\(authViewModel.user?.xp ?? 0) XP")
+                    .font(.headline)
+            })*/
+            
             .onAppear {
                 if let user = authViewModel.user, let userID = user.id {
                     notificationViewModel.startListeningForNotifications(for: userID)
@@ -58,6 +54,7 @@ struct ChildDashboardView: View {
             }
             .onDisappear {
                 notificationViewModel.stopListening()
+                
             }
         }
     }
