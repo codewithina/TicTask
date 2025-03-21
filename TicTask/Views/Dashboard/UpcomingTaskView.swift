@@ -11,13 +11,18 @@ struct UpcomingTaskView: View {
     var task: Task
 
     var body: some View {
-        SectionBox(title: "Nästa läxa") {
             HStack {
-                Image(systemName: task.iconName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(Color(hex: task.colorHex))
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: task.colorHex).opacity(0.2))
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: task.iconName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 25, height: 25)
+                        .foregroundColor(Color(hex: task.colorHex))
+                }
 
                 VStack(alignment: .leading) {
                     Text(task.title)
@@ -29,6 +34,5 @@ struct UpcomingTaskView: View {
                 Spacer()
             }
             .padding()
-        }
     }
 }

@@ -4,7 +4,6 @@
 //
 //  Created by Ina Burström on 2025-03-03.
 //
-
 import SwiftUI
 
 struct AddTaskView: View {
@@ -16,10 +15,9 @@ struct AddTaskView: View {
     @State private var description = ""
     @State private var deadline = Date()
     @State private var xpReward = 10
-    @State private var selectedChild = ""
-    // @State private var selectedChildren: [String] = []
-    @State private var selectedIcon = "pencil" // Default
-    @State private var selectedColor = "#FF5733" // Default
+    @State private var selectedChild: User?
+    @State private var selectedIcon = "pencil"
+    @State private var selectedColor = "#FF5733"
     
     let colorOptions: [(hex: String, color: Color)] = [
         ("#D7C2D8", Color.lilac),
@@ -37,22 +35,13 @@ struct AddTaskView: View {
                 Section(header: Text("Uppgiftsinformation")) {
                     TextField("Titel", text: $title)
                     
-                    ZStack(alignment: .topLeading) {
-                        if description.isEmpty {
-                            Text("Beskrivning")
-                                .foregroundColor(Color(UIColor.placeholderText))
-                                .padding(.vertical, 14)
-                                .padding(.horizontal, 5)
-                        }
-                        
-                        TextEditor(text: $description)
-                            .frame(minHeight: 100)
-                            .padding(.vertical, 5)
-                    }
+                    TextEditor(text: $description)
+                        .frame(minHeight: 100)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.2)))
                     
-                    
-                    DatePicker("Deadline", selection: $deadline, displayedComponents: .date)
+                    DatePicker("Deadline", selection: $deadline, in: Date()..., displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
+                    
                     Stepper("XP Belöning: \(xpReward)", value: $xpReward, in: 5...50, step: 5)
                 }
                 
@@ -77,7 +66,6 @@ struct AddTaskView: View {
                             }
                         }
                     }
-                    .padding(.vertical, 5)
                     
                     HStack {
                         ForEach(colorOptions, id: \.hex) { colorOption in
@@ -96,22 +84,21 @@ struct AddTaskView: View {
                             }
                         }
                     }
-                    .padding(.vertical, 5)
                 }
                 
-                if let user = authViewModel.user, user.role == "parent", let children = user.children, !children.isEmpty {
+                if authViewModel.user?.role == "parent", !authViewModel.childrenUsers.isEmpty {
                     Section(header: Text("Välj barn")) {
-                        ForEach(children, id: \.self) { childID in
+                        ForEach(authViewModel.childrenUsers, id: \.id) { child in
                             HStack {
-                                Text(authViewModel.childrenNames[childID] ?? "Okänt namn")
+                                Text(child.name)
                                 Spacer()
-                                if selectedChild == childID {
+                                if selectedChild?.id == child.id {
                                     Image(systemName: "checkmark")
                                 }
                             }
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                selectedChild = childID
+                                selectedChild = child
                             }
                         }
                     }
@@ -129,28 +116,29 @@ struct AddTaskView: View {
                     Button("Spara") {
                         saveTask()
                     }
-                    .disabled(authViewModel.user?.role == "parent" && selectedChild.isEmpty)
+                    .disabled(authViewModel.user?.role == "parent" && selectedChild == nil)
                 }
             }
         }
     }
     
     private func saveTask() {
-        guard let user = authViewModel.user else { return }
+        guard let user = authViewModel.user, let userID = user.id else {
+            print("🚨 Ingen användare inloggad eller `user.id` saknas")
+            return
+        }
         
         if user.role == "child" {
-            taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: user.id, assignedTo: user.id, iconName: selectedIcon, colorHex: selectedColor)
-        } else if user.role == "parent", !selectedChild.isEmpty {
-            taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: user.id, assignedTo: selectedChild, iconName: selectedIcon, colorHex: selectedColor)
+            let parentIDs = user.parentIDs ?? []
+            taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: userID, parentIDs: parentIDs, iconName: selectedIcon, colorHex: selectedColor)
+        } else if user.role == "parent", let child = selectedChild {
+            if let childID = child.id {
+                taskViewModel.addTask(title: title, description: description, deadline: deadline, xpReward: xpReward, createdBy: userID, assignedTo: childID, parentIDs: [], iconName: selectedIcon, colorHex: selectedColor)
+            } else {
+                print("🚨 Fel: child.id är nil")
+            }
         }
+
         showAddTaskView = false
     }
 }
-
-#Preview {
-    AddTaskView(showAddTaskView: .constant(true))
-        .environmentObject(TaskViewModel.shared)
-        .environmentObject(AuthViewModel())
-}
-
-

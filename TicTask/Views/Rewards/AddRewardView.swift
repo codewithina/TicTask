@@ -4,7 +4,6 @@
 //
 //  Created by Ina Burström on 2025-03-12.
 //
-
 import SwiftUI
 
 struct AddRewardView: View {
@@ -18,8 +17,7 @@ struct AddRewardView: View {
     @State private var selectedColor = "#FF5733" // 🔹 Standardfärg
     @State private var selectedIcon = "star.fill" // 🔹 Standardikon
     @State private var selectedChildren: [String] = []
-    
-    // 🔹 Fasta färgalternativ
+
     let colorOptions: [(hex: String, color: Color)] = [
         ("#D7C2D8", Color.lilac),
         ("#B3D9E1", Color.polarsky),
@@ -38,70 +36,31 @@ struct AddRewardView: View {
                     TextField("Beskrivning", text: $description)
                     Stepper("XP-kostnad: \(xpCost)", value: $xpCost, in: 5...100, step: 5)
                 }
+
                 Section(header: Text("Välj ikon & färg")) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(iconOptions, id: \.self) { icon in
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedIcon == icon ? Color.gray.opacity(0.3) : Color.clear)
-                                        .frame(width: 50, height: 50)
-
-                                    Image(systemName: icon)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 30, height: 30)
-                                        .foregroundColor(.black)
-                                }
-                                .onTapGesture {
-                                    selectedIcon = icon
-                                }
+                                iconSelectionButton(icon: icon)
                             }
                         }
                     }
-                    .padding(.vertical, 5)
 
                     HStack {
                         ForEach(colorOptions, id: \.hex) { colorOption in
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(colorOption.color)
-                                    .frame(width: 40, height: 40)
-                                if selectedColor == colorOption.hex {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.white)
-                                        .bold()
-                                }
-                            }
-                            .onTapGesture {
-                                selectedColor = colorOption.hex
-                            }
+                            colorSelectionButton(colorOption: colorOption)
                         }
                     }
-                    .padding(.vertical, 5)
                 }
 
                 Section(header: Text("Välj barn")) {
-                    if let children = authViewModel.user?.children, !children.isEmpty {
-                        ForEach(children, id: \.self) { childID in
-                            HStack {
-                                Text(authViewModel.childrenNames[childID] ?? "Okänt namn")
-                                Spacer()
-                                if selectedChildren.contains(childID) {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                if selectedChildren.contains(childID) {
-                                    selectedChildren.removeAll { $0 == childID }
-                                } else {
-                                    selectedChildren.append(childID)
-                                }
-                            }
+                    if authViewModel.user?.role == "parent", !authViewModel.childrenUsers.isEmpty {
+                        ForEach(authViewModel.childrenUsers) { child in
+                            ChildSelectionRow(child: child, selectedChildren: $selectedChildren)
                         }
                     } else {
                         Text("Du har inga barn kopplade.")
+                            .foregroundColor(.gray)
                     }
                 }
             }
@@ -116,6 +75,7 @@ struct AddRewardView: View {
                     Button("Spara") {
                         saveReward()
                     }
+                    .disabled(title.isEmpty || selectedChildren.isEmpty)
                 }
             }
         }
@@ -134,6 +94,39 @@ struct AddRewardView: View {
             assignedTo: selectedChildren
         )
         
-        showAddRewardView = false  // Stänger vyn
+        showAddRewardView = false
+    }
+
+    private func iconSelectionButton(icon: String) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(selectedIcon == icon ? Color.gray.opacity(0.3) : Color.clear)
+                .frame(width: 50, height: 50)
+
+            Image(systemName: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .foregroundColor(.black)
+        }
+        .onTapGesture {
+            selectedIcon = icon
+        }
+    }
+
+    private func colorSelectionButton(colorOption: (hex: String, color: Color)) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(colorOption.color)
+                .frame(width: 40, height: 40)
+            if selectedColor == colorOption.hex {
+                Image(systemName: "checkmark")
+                    .foregroundColor(.white)
+                    .bold()
+            }
+        }
+        .onTapGesture {
+            selectedColor = colorOption.hex
+        }
     }
 }

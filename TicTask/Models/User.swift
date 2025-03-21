@@ -6,13 +6,15 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct User: Identifiable, Codable {
-    let id: String
-    let name: String
+    @DocumentID var id: String?
+    var name: String
     let email: String
     let role: String  // "child" or "parent"
     let xp: Int?
+    let totalXP: Int?
     let parentIDs: [String]?  // List of parents ID if child
     let children: [String]?  // List of childrens ID if parent
 }
