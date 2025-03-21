@@ -35,13 +35,15 @@ struct XPProgressView: View {
                     )
                     .frame(width: 220, height: 160)
                     .rotationEffect(.degrees(180))
+                    .offset(y:30)
                 
                     Text("\(currentLevel)")
                         .font(.system(size: 50, weight: .bold))
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
-                        .offset(y: 0)
+                        .offset(y: 25)
             }
+
             HStack {
                 Image(systemName: "star.circle.fill")
                     .foregroundColor(.yellow)
@@ -50,8 +52,7 @@ struct XPProgressView: View {
                 Text(" \(spendableXP)")
                     .font(.title)
             }
-            .padding(.top, 5)
-            .offset(y: -50)
+            .padding(.top, -20)
         }
         .padding(.vertical)
     }
