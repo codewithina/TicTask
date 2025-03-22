@@ -61,7 +61,7 @@ class XPBonusManager {
                 type: .streak
             )
             bonusEvents.append(event)
-        }   
+        }
         
         // Save and log bonuses
         for event in bonusEvents {
