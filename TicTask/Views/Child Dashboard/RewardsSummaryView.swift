@@ -13,7 +13,6 @@ struct RewardsSummaryView: View {
     var body: some View {
             Text("\(rewardCount) belöningar att köpa")
                 .font(.headline)
-                .foregroundColor(.blue)
                 .padding()
     }
 }
