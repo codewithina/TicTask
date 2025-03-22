@@ -24,6 +24,14 @@ struct ChildDashboardView: View {
                     
                     NotificationSection(title: "Notiser", icon: "bell", color: "#FFC107")
                     
+                    DashboardCard(title: "XP-händelser", icon: "sparkles", color: "#9C27B0") {
+                        XPLogListView(userID: authViewModel.user?.id ?? "")
+                    }
+
+                    DashboardCard(title: "Streak", icon: "flame.fill", color: "#FF5722") {
+                        StreakSummaryView(userID: authViewModel.user?.id ?? "")
+                    }
+                    
                     if let task = getUpcomingTask() {
                         DashboardCard(title: "Nästa Uppgift", icon: "calendar", color: "#2196F3") {
                             UpcomingTaskView(task: task)
