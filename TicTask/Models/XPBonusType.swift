@@ -1,18 +1,12 @@
-from IPython.display import Markdown
+//
+//  XPBonusType.swift
+//  TicTask
+//
+//  Created by Ina Burström on 2025-03-22.
+//
 
-# Prepare a clean summary of all updated files for the user's new XPLog setup
-summary = """
-### ✅ XPLog – Levande och enklare med Swift Codable
-
-Här är en full överblick med **levande XP-logg** och en **minimal modell med `Codable`**.
-
----
-
-## 1. 📄 XPEvent.swift (modellen)
-
-```swift
 import Foundation
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 enum XPBonusType: String, Codable {
     case baseTask
