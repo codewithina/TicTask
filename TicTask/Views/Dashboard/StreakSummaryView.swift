@@ -1,17 +1,31 @@
+//
+//  StreakSummaryView.swift
+//  TicTask
+//
+//  Created by Ina Burström on 2025-03-22.
+
+import SwiftUI
+
 struct StreakSummaryView: View {
-    @State private var streakDays: Int = 0
+    @EnvironmentObject var taskViewModel: TaskViewModel
     let userID: String
+    @State private var streakDays = 0
 
     var body: some View {
         VStack {
-            Text("🔥 \(streakDays) dagar utan missade deadlines!")
-                .font(.headline)
-                .foregroundColor(streakDays >= 3 ? .orange : .gray)
+            if taskViewModel.tasks.isEmpty {
+                ProgressView("Laddar streak...")
+            } else {
+                Text("\(streakDays) dagar utan missade deadlines!")
+                    .font(.headline)
+                    .foregroundColor(streakDays >= 3 ? .orange : .gray)
+            }
         }
         .onAppear {
-            XPStreakService.shared.getCurrentStreak(for: userID) { days in
-                self.streakDays = days
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                streakDays = taskViewModel.calculateStreakDays(for: userID)
             }
         }
     }
 }
+
