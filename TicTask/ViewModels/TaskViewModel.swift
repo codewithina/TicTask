@@ -135,6 +135,15 @@ class TaskViewModel: ObservableObject {
                     
                     self.fetchTaskXPAndUpdateUser(taskID: task.id)
                     
+                    let baseXPEvent = XPEvent(
+                        title: "✅ Klarade \"\(task.title)\"",
+                        xp: task.xpReward,
+                        date: now,
+                        type: .baseTask
+                    )
+
+                    XPLogService.shared.logXPEvent(userID: user.id ?? "", event: baseXPEvent)
+                    
                     let userName = user.name
                     
                     // If child complete task → Send notification to parents
