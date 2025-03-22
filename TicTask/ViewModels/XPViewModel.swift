@@ -1,4 +1,11 @@
-import Foundation
+//
+//  XPViewModel.swift
+//  TicTask
+//
+//  Created by Ina Burström on 2025-03-22.
+//
+
+import SwiftUI
 
 class XPViewModel: ObservableObject {
     @Published var xpLog: [XPEvent] = []
