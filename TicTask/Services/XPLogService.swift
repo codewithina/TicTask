@@ -1,5 +1,11 @@
+//
+//  XPLogService.swift
+//  TicTask
+//
+//  Created by Ina Burström on 2025-03-22.
+//
+
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 class XPLogService {
     static let shared = XPLogService()
