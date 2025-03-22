@@ -25,6 +25,7 @@ class TaskViewModel: ObservableObject {
             deadline: deadline,
             xpReward: xpReward,
             status: "pending",
+            completedDate: nil,
             assignedTo: assignedTo,
             createdBy: createdBy,
             iconName: iconName,
@@ -115,11 +116,25 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Läxa markerad som klar!")
+                    
+                    guard let user = self.authViewModel?.user else { return }
+                    
+                    let now = Date()
+                    
+                    if user.role == "child" {
+                        if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
+                            self.tasks[index].status = "completed"
+                            self.tasks[index].completedDate = now
+                        }
+                    } else if user.role == "parent" {
+                        if let index = self.childrenTasks.firstIndex(where: { $0.id == task.id }) {
+                            self.childrenTasks[index].status = "completed"
+                            self.childrenTasks[index].completedDate = now
+                        }
+                    }
+                    
                     self.fetchTaskXPAndUpdateUser(taskID: task.id)
                     
-                    guard let user = self.authViewModel?.user else {
-                        return
-                    }
                     let userName = user.name
                     
                     // If child complete task → Send notification to parents
