@@ -25,6 +25,7 @@ class TaskViewModel: ObservableObject {
             deadline: deadline,
             xpReward: xpReward,
             status: "pending",
+            completedDate: nil,
             assignedTo: assignedTo,
             createdBy: createdBy,
             iconName: iconName,
@@ -115,11 +116,43 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     print("✅ Läxa markerad som klar!")
+                    
+                    guard let user = self.authViewModel?.user else { return }
+                    
+                    let now = Date()
+                    
+                    if user.role == "child" {
+                        if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
+                            self.tasks[index].status = "completed"
+                            self.tasks[index].completedDate = now
+                        }
+                    } else if user.role == "parent" {
+                        if let index = self.childrenTasks.firstIndex(where: { $0.id == task.id }) {
+                            self.childrenTasks[index].status = "completed"
+                            self.childrenTasks[index].completedDate = now
+                        }
+                    }
+                    
                     self.fetchTaskXPAndUpdateUser(taskID: task.id)
                     
-                    guard let user = self.authViewModel?.user else {
-                        return
-                    }
+                    let baseXPEvent = XPEvent(
+                        title: "Klarade \"\(task.title)\" 🚀",
+                        xp: task.xpReward,
+                        date: now,
+                        type: .baseTask
+                    )
+
+                    XPLogService.shared.logXPEvent(userID: user.id ?? "", event: baseXPEvent)
+                    
+                    XPBonusManager.shared.applyBonuses(
+                        for: task,
+                        user: user,
+                        completedAt: now,
+                        allCompletedTasks: self.tasks.filter {
+                            $0.assignedTo == user.id && $0.isCompleted
+                        }
+                    )
+                    
                     let userName = user.name
                     
                     // If child complete task → Send notification to parents
@@ -205,5 +238,48 @@ class TaskViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    func calculateStreakDays(for userID: String) -> Int {
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Filtrera endast uppgifter som har en deadline
+        let relevantTasks = tasks.filter {
+            $0.assignedTo == userID && $0.deadline != nil
+        }
+
+        // 🛑 Om inga tasks finns – returnera 0 direkt
+        if relevantTasks.isEmpty {
+            return 0
+        }
+
+        var streakDays = 0
+        var currentDate = calendar.startOfDay(for: now)
+
+        // Undvik oändlig loop: sätt ett max antal dagar bakåt (t.ex. 30)
+        for _ in 0..<30 {
+            let tasksDueToday = relevantTasks.filter {
+                guard let deadline = $0.deadline else { return false }
+                return calendar.isDate(deadline, inSameDayAs: currentDate)
+            }
+
+            if tasksDueToday.isEmpty {
+                // Gå vidare till dagen innan
+                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                continue
+            }
+
+            let allDone = tasksDueToday.allSatisfy { $0.isCompleted }
+
+            if allDone {
+                streakDays += 1
+                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+            } else {
+                break
+            }
+        }
+
+        return streakDays
     }
 }
