@@ -9,71 +9,64 @@ import Foundation
 
 class XPBonusManager {
     static let shared = XPBonusManager()
-    
+
     func applyBonuses(for task: Task, user: User, completedAt: Date, allCompletedTasks: [Task]) {
         let userID = user.id ?? ""
         var bonusEvents: [XPEvent] = []
-        
-        // Deadline bonus - two days before deadline
+
+        // Deadline bonus - done two days before deadline
         if let deadline = task.deadline,
            Calendar.current.dateComponents([.day], from: completedAt, to: deadline).day ?? 0 >= 2 {
             let extraXP = Int(Double(task.xpReward) * 0.2)
-            let event = XPEvent(
-                title: "Läxan klar före deadline ⏳",
-                xp: extraXP,
-                date: completedAt,
-                type: .deadlineEarly
+            bonusEvents.append(
+                XPEvent(title: "Läxan klar före deadline ⏳", xp: extraXP, date: completedAt, type: .deadlineEarly)
             )
-            bonusEvents.append(event)
         }
-        
-        // Daily combo - two tasks on one day
-        let sameDay = allCompletedTasks.filter {
+
+        // Daily combo - two tasks done same day
+        let sameDayTasks = allCompletedTasks.filter {
             Calendar.current.isDate($0.completedDate ?? .distantPast, inSameDayAs: completedAt)
         }
-        
-        if sameDay.count >= 2 {
-            let event = XPEvent(
-                title: "Dagscombo: Två tasks samma dag ⚡",
-                xp: 10,
-                date: completedAt,
-                type: .dailyCombo
+
+        if sameDayTasks.count >= 2 {
+            bonusEvents.append(
+                XPEvent(title: "Två tasks samma dag ⚡", xp: 10, date: completedAt, type: .dailyCombo)
             )
-            bonusEvents.append(event)
         }
-        
-        // Streak bonus - 3 days in a row
+
+        // Streak - done tasks 3 days
         let calendar = Calendar.current
         let last3Days = (0..<3).map { calendar.date(byAdding: .day, value: -$0, to: completedAt)! }
-        
+
         let streakOK = last3Days.allSatisfy { day in
             allCompletedTasks.contains(where: {
                 guard let completed = $0.completedDate else { return false }
                 return calendar.isDate(completed, inSameDayAs: day)
             })
         }
-        
+
         if streakOK {
-            let event = XPEvent(
-                title: "🔥 Streak! 3 dagar i rad 🏆",
-                xp: 10,
-                date: completedAt,
-                type: .streak
+            bonusEvents.append(
+                XPEvent(title: "🔥 Streak! 3 dagar i rad 🏆", xp: 10, date: completedAt, type: .streak)
             )
-            bonusEvents.append(event)
         }
-        
-        // Save and log bonuses
-        for event in bonusEvents {
-            TaskService.shared.updateUserXP(userID: userID, xpReward: event.xp) { result in
+
+        // Sum bonus XP & update XP once
+        let totalBonusXP = bonusEvents.reduce(0) { $0 + $1.xp }
+
+        if totalBonusXP > 0 {
+            TaskService.shared.updateUserXP(userID: userID, xpReward: totalBonusXP) { result in
                 switch result {
                 case .success:
-                    print("✅ Bonus XP: \(event.title) +\(event.xp) XP")
-                    XPLogService.shared.logXPEvent(userID: userID, event: event)
+                    for event in bonusEvents {
+                        XPLogService.shared.logXPEvent(userID: userID, event: event)
+                    }
+
                 case .failure(let error):
-                    print("🔴 Kunde inte uppdatera XP: \(error.localizedDescription)")
+                    print("🔴 Kunde inte uppdatera bonus-XP: \(error.localizedDescription)")
                 }
             }
         }
     }
 }
+
