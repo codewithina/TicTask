@@ -33,9 +33,14 @@ struct ChildDashboardView: View {
                         StreakSummaryView(userID: authViewModel.user?.id ?? "")
                     }
                     
-                    if let task = getUpcomingTask() {
-                        DashboardCard(title: "Nästa Uppgift", icon: "calendar", color: "#2196F3") {
-                            UpcomingTaskView(task: task)
+                    let upcomingTasks = getUpcomingTasks()
+                    if !upcomingTasks.isEmpty {
+                        DashboardCard(title: "Kommande uppgifter", icon: "calendar", color: "#2196F3") {
+                            VStack(spacing: 10) {
+                                ForEach(upcomingTasks) { task in
+                                    UpcomingTaskView(task: task)
+                                }
+                            }
                         }
                     }
                     
@@ -69,10 +74,16 @@ struct ChildDashboardView: View {
         }
     }
     
-    private func getUpcomingTask() -> Task? {
-        taskViewModel.tasks.sorted {
-            ($0.deadline ?? Date.distantFuture) < ($1.deadline ?? Date.distantFuture)
-        }.first
+    private func getUpcomingTasks() -> [Task] {
+        let now = Date()
+        let twoDaysFromNow = Calendar.current.date(byAdding: .day, value: 2, to: now)!
+
+        return taskViewModel.tasks.filter { task in
+            guard task.status == "pending", let deadline = task.deadline else { return false }
+            return deadline < twoDaysFromNow || deadline < now
+        }
+        .sorted { ($0.deadline ?? Date.distantFuture) < ($1.deadline ?? Date.distantFuture) }
     }
+
 }
 
