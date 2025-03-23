@@ -14,43 +14,57 @@ struct LoginView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                Text("TicTask")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+            ZStack {
+                BackgroundView()
 
-                TextField("E-post", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .disableAutocorrection(true)
-                    .textInputAutocapitalization(.never)
+                VStack(spacing: 24) {
+                    VStack(spacing: 8) {
+                        Text("TicTask")
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .foregroundColor(.primary)
 
-                SecureField("Lösenord", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+                        Text("Logga in för att fortsätta")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
 
-                if let errorMessage = authViewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                }
+                    VStack(spacing: 16) {
+                        TextField("E-post", text: $email)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disableAutocorrection(true)
+                            .textInputAutocapitalization(.never)
 
-                Button("Logga in") {
-                    authViewModel.login(email: email, password: password)
+                        SecureField("Lösenord", text: $password)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                    .padding(.horizontal)
+
+                    if let errorMessage = authViewModel.errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
+                            .padding(.horizontal)
+                    }
+
+                    Button(action: {
+                        authViewModel.login(email: email, password: password)
+                    }) {
+                        Text("Logga in")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+
+                    NavigationLink("Har du inget konto? Registrera dig", destination: RegisterView())
+                        .font(.footnote)
+                        .foregroundColor(.blue)
                 }
                 .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-
-                NavigationLink("Registrera nytt konto", destination: RegisterView())
-                    .padding()
             }
-            .padding()
+            .navigationBarHidden(true)
         }
     }
-}
-
-#Preview {
-    LoginView()
 }
