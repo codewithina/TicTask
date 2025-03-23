@@ -28,7 +28,7 @@ struct ChildDashboardView: View {
                     DashboardCard(title: "XP-händelser", icon: "sparkles", color: "#9C27B0") {
                         XPLogListView(userID: authViewModel.user?.id ?? "")
                     }
-
+                    
                     DashboardCard(title: "Streak", icon: "flame.fill", color: "#FF5722") {
                         StreakSummaryView(userID: authViewModel.user?.id ?? "")
                     }
@@ -50,14 +50,17 @@ struct ChildDashboardView: View {
                 }
                 .padding()
             }
+            .background(
+                BackgroundView()
+            )
             
-           /* .navigationBarItems(trailing: HStack {
-                Image(systemName: "star.circle.fill")
-                    .foregroundColor(.yellow)
-                
-                Text("\(authViewModel.user?.xp ?? 0) XP")
-                    .font(.headline)
-            })*/
+            /* .navigationBarItems(trailing: HStack {
+             Image(systemName: "star.circle.fill")
+             .foregroundColor(.yellow)
+             
+             Text("\(authViewModel.user?.xp ?? 0) XP")
+             .font(.headline)
+             })*/
             
             .onAppear {
                 if let user = authViewModel.user, let userID = user.id {
@@ -77,13 +80,13 @@ struct ChildDashboardView: View {
     private func getUpcomingTasks() -> [Task] {
         let now = Date()
         let twoDaysFromNow = Calendar.current.date(byAdding: .day, value: 2, to: now)!
-
+        
         return taskViewModel.tasks.filter { task in
             guard task.status == "pending", let deadline = task.deadline else { return false }
             return deadline < twoDaysFromNow || deadline < now
         }
         .sorted { ($0.deadline ?? Date.distantFuture) < ($1.deadline ?? Date.distantFuture) }
     }
-
+    
 }
 
