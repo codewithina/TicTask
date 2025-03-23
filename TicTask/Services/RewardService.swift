@@ -32,6 +32,18 @@ class RewardService {
         }
     }
     
+    func deleteReward(rewardID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        db.collection("rewards").document(rewardID).delete { error in
+            if let error = error {
+                print("🔴 Misslyckades att ta bort uppgiften: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                print("✅ Uppgift borttagen!")
+                completion(.success(()))
+            }
+        }
+    }
+    
     func fetchAvailableRewards(for userID: String, completion: @escaping (Result<[Reward], Error>) -> Void) {
         db.collection("rewards").whereField("assignedTo", arrayContains: userID).getDocuments { snapshot, error in
             if let error = error {
