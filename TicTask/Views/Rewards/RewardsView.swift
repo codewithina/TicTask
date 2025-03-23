@@ -13,6 +13,10 @@ struct RewardsView: View {
     
     @State private var showConfirmation = false
     @State private var selectedReward: Reward?
+    
+    var isChild: Bool {
+        authViewModel.user?.role == "child"
+    }
 
     var body: some View {
         NavigationStack {
@@ -48,8 +52,16 @@ struct RewardsView: View {
                                 Text("XP: \(reward.xpCost)")
                                     .font(.subheadline)
                                     .foregroundColor(.blue)
+                                
+                                if isChild {
+                                    Text("Tillagd av: \(authViewModel.parentNames[reward.createdBy] ?? "Förälder")")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
+
+                            let canAfford = (authViewModel.user?.xp ?? 0) >= reward.xpCost
 
                             Button(action: {
                                 selectedReward = reward
@@ -58,10 +70,11 @@ struct RewardsView: View {
                                 Text("Köp")
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(Color.green)
+                                    .background(canAfford ? Color.green : Color.gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
+                            .disabled(!canAfford)
                         }
                         .padding(.vertical, 5)
                     }

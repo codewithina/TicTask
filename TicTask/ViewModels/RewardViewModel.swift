@@ -46,6 +46,32 @@ class RewardViewModel: ObservableObject {
         }
     }
     
+    func deleteReward(reward: Reward) {
+        RewardService.shared.deleteReward(rewardID: reward.id ?? "") { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.availableRewards.removeAll { $0.id == reward.id }
+                    
+                    guard let user = self.authViewModel?.user else { return }
+                    let userName = user.name
+                    
+                    if user.id == reward.createdBy {
+                        for childID in reward.assignedTo {
+                            self.notificationViewModel?.sendNotification(
+                                to: childID,
+                                message: "\(userName) har tagit bort belöningen \"\(reward.title)\"."
+                            )
+                        }
+                    }
+                    
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
     func loadRewards(for userID: String) {
         RewardService.shared.fetchAvailableRewards(for: userID) { result in
             DispatchQueue.main.async {
