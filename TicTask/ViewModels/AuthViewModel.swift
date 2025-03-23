@@ -9,6 +9,7 @@ import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
     var taskViewModel: TaskViewModel?
+    var xpViewModel: XPViewModel?
     
     private let authService = AuthService.shared
     private let db = Firestore.firestore()
@@ -302,6 +303,7 @@ class AuthViewModel: ObservableObject {
                             self.childrenUsers.append(child)
                         }
                         print("✅ Uppdaterad data för \(child.name), XP: \(child.xp ?? 0), total XP: \(child.totalXP ?? 0)")
+                        self.xpViewModel?.startListeningForXPPerDay(for: self.childrenUsers)
                     }
                 }
             
