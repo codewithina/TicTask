@@ -22,10 +22,6 @@ struct LoginView: View {
                         Text("TicTask")
                             .font(.system(size: 36, weight: .bold, design: .rounded))
                             .foregroundColor(.primary)
-
-                        Text("Logga in för att fortsätta")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
                     }
 
                     VStack(spacing: 16) {
