@@ -68,5 +68,34 @@ class XPBonusManager {
             }
         }
     }
+    
+    func checkForLevelUp(userID: String, oldTotalXP: Int, newTotalXP: Int, isTriggeredByLevelUp: Bool = false) {
+        if isTriggeredByLevelUp { return }
+
+        let oldLevel = oldTotalXP / 1000 + 1
+        let newLevel = newTotalXP / 1000 + 1
+
+        if newLevel > oldLevel {
+            let event = XPEvent(
+                title: "Du gick upp till nivå \(newLevel)! 🎉",
+                xp: 50,
+                date: Date(),
+                type: .levelUp
+            )
+
+            XPLogService.shared.logXPEvent(userID: userID, event: event)
+
+            TaskService.shared.updateUserXP(userID: userID, xpReward: event.xp) { _ in
+                print("🚀 Extra XP för level-up till \(newLevel)!")
+                
+                XPBonusManager.shared.checkForLevelUp(
+                    userID: userID,
+                    oldTotalXP: newTotalXP,
+                    newTotalXP: newTotalXP + event.xp,
+                    isTriggeredByLevelUp: true
+                )
+            }
+        }
+    }
 }
 
