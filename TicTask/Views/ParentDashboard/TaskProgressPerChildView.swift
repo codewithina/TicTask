@@ -58,7 +58,7 @@ struct TaskProgressPerChildView: View {
                                 .frame(height: 10)
 
                             RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.blue)
+                                .fill(Color(hex: "#64B5F6"))
                                 .frame(width: CGFloat(progress) * 200, height: 10)
                         }
                         .frame(width: 200)
