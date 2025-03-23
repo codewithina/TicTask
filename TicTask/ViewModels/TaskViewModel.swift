@@ -134,7 +134,7 @@ class TaskViewModel: ObservableObject {
                         date: now,
                         type: .baseTask
                     )
-
+                    
                     XPLogService.shared.logXPEvent(userID: user.id ?? "", event: baseXPEvent)
                     
                     XPBonusManager.shared.applyBonuses(
@@ -178,8 +178,9 @@ class TaskViewModel: ObservableObject {
     }
     
     func startListeningForTasks(for user: User) {
-        if isListening { return }
-
+        tasks = []
+        childrenTasks = []
+        
         if let userID = user.id {
             TaskService.shared.listenForTasks(for: userID) { newTasks in
                 DispatchQueue.main.async {
@@ -190,7 +191,7 @@ class TaskViewModel: ObservableObject {
         } else {
             print("🚨 `user.id` är nil – kan inte lyssna på uppgifter")
         }
-
+        
         if user.role == "parent", let children = user.children {
             for childID in children {
                 TaskService.shared.listenForTasks(for: childID) { newTasks in
@@ -202,7 +203,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
-
+    
     
     private func fetchTaskXPAndUpdateUser(taskID: String) {
         let taskRef = Firestore.firestore().collection("tasks").document(taskID)
@@ -241,26 +242,26 @@ class TaskViewModel: ObservableObject {
         if relevantTasks.isEmpty {
             return 0
         }
-
+        
         var streakDays = 0
         var currentDate = calendar.startOfDay(for: now)
-
+        
         for _ in 0..<30 {
             let tasksDueToday = relevantTasks.filter {
                 guard let deadline = $0.deadline else { return false }
                 return calendar.isDate(deadline, inSameDayAs: currentDate)
             }
-
+            
             let missedTask = tasksDueToday.contains { !$0.isCompleted && ($0.deadline ?? now) <= currentDate }
             if missedTask {
                 break
             }
-
+            
             if tasksDueToday.isEmpty {
                 currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
                 continue
             }
-
+            
             let allDone = tasksDueToday.allSatisfy { $0.isCompleted }
             if allDone {
                 streakDays += 1
@@ -269,7 +270,7 @@ class TaskViewModel: ObservableObject {
                 break
             }
         }
-
+        
         return streakDays
     }
 }
