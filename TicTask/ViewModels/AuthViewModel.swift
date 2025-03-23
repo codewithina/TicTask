@@ -25,14 +25,12 @@ class AuthViewModel: ObservableObject {
     @Published var childrenUsers: [User] = []
     
     func register(email: String, password: String, name: String, role: String, parentIDs: [String]?, children: [String]?) {
-        print("🟡 Försöker registrera användare: \(email)")
         self.errorMessage = nil
         
         authService.registerUser(email: email, password: password, name: name, role: role, parentIDs: parentIDs, children: children) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let user):
-                    print("✅ Registrering lyckades!")
                     self.user = user
                     self.isAuthenticated = true
                     
@@ -45,7 +43,6 @@ class AuthViewModel: ObservableObject {
                     }
                     
                     if user.role == "parent" || user.role == "child" {
-                        print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
                         self.startListeningForUserChanges()
                         self.taskViewModel?.startListeningForTasks(for: user)
                     }
@@ -59,16 +56,17 @@ class AuthViewModel: ObservableObject {
     }
     
     func login(email: String, password: String) {
-        print("🟡 Försöker logga in: \(email)")
         self.errorMessage = nil
         
         authService.login(email: email, password: password) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let user):
-                    print("✅ Inloggning lyckades! Roll: \(user.role)")
                     self.user = user
                     self.isAuthenticated = true
+                    
+                    self.startListeningForUserChanges()
+                    self.taskViewModel?.startListeningForTasks(for: user)
                     
                     if user.role == "parent" {
                         self.loadAndListenToChildren(for: user)
@@ -77,12 +75,7 @@ class AuthViewModel: ObservableObject {
                     if user.role == "child" {
                         self.loadAndListenToParents(for: user)
                     }
-                    
-                    if user.role == "parent" || user.role == "child" {
-                        print("🟢 Startar Firestore realtidslyssnare för \(user.name)")
-                        self.startListeningForUserChanges()
-                        self.taskViewModel?.startListeningForTasks(for: user)
-                    }
+        
                     
                 case .failure(let error):
                     print("🔴 Inloggning misslyckades: \(error.localizedDescription)")
@@ -97,7 +90,6 @@ class AuthViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    print("🔴 Utloggad!")
                     self.stopListeningForChildrenUpdates()
                     self.userListener?.remove()
                     self.userListener = nil
@@ -140,12 +132,9 @@ class AuthViewModel: ObservableObject {
                         return
                     }
                     
-                    print("📢 Hämtade data för \(parentID): \(data)")
-                    
                     if let name = data["name"] as? String {
                         DispatchQueue.main.async {
                             self.parentNames[parentID] = name
-                            print("✅ Uppdaterat föräldernamn för \(parentID): \(name)")
                         }
                     }
                 }
@@ -158,7 +147,6 @@ class AuthViewModel: ObservableObject {
             listener.remove()
         }
         parentListeners.removeAll()
-        print("🛑 Stoppade alla föräldralyssnare.")
     }
     
     func startListeningForUserChanges() {
@@ -166,8 +154,6 @@ class AuthViewModel: ObservableObject {
             print("🚨 Ingen användare inloggad, kan inte starta lyssnaren.")
             return
         }
-
-        print("📡 Startar realtidslyssnare för den inloggade användaren.")
 
         userListener = db.collection("users").document(userID)
             .addSnapshotListener { [weak self] snapshot, error in
@@ -186,7 +172,6 @@ class AuthViewModel: ObservableObject {
 
                 DispatchQueue.main.async {
                     self.user = updatedUser
-                    print("📢 Användarens data uppdaterad: \(self.user?.name ?? "Okänt namn")")
                 }
             }
     }
@@ -223,7 +208,6 @@ class AuthViewModel: ObservableObject {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    print("✅ Barn kopplades till förälder i Firestore!")
                     completion(.success(()))
                 }
             }
@@ -245,7 +229,6 @@ class AuthViewModel: ObservableObject {
             if let error = error {
                 print("❌ Misslyckades att ta bort barnet: \(error.localizedDescription)")
             } else {
-                print("✅ Barn borttaget!")
                 self.childrenUsers.removeAll { $0.id == childID }
             }
         }
@@ -278,8 +261,6 @@ class AuthViewModel: ObservableObject {
                         return
                     }
                     
-                    print("📢 Hämtade data för \(childID): \(data)")
-                    
                     guard let childID = snapshot?.documentID else {
                         print("❌ Dokument-ID saknas för \(childID)")
                         return
@@ -302,7 +283,6 @@ class AuthViewModel: ObservableObject {
                         } else {
                             self.childrenUsers.append(child)
                         }
-                        print("✅ Uppdaterad data för \(child.name), XP: \(child.xp ?? 0), total XP: \(child.totalXP ?? 0)")
                         self.xpViewModel?.startListeningForXPPerDay(for: self.childrenUsers)
                     }
                 }

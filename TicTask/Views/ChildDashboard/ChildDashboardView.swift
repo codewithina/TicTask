@@ -12,6 +12,7 @@ struct ChildDashboardView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
+    @EnvironmentObject var xpViewModel: XPViewModel
     
     var body: some View {
         NavigationStack {
@@ -58,11 +59,12 @@ struct ChildDashboardView: View {
                     notificationViewModel.startListeningForNotifications(for: userID)
                     rewardViewModel.startListeningForRewards(for: userID)
                     taskViewModel.startListeningForTasks(for: user)
+                    xpViewModel.startListening(for: userID)
                 }
             }
             .onDisappear {
                 notificationViewModel.stopListening()
-                
+                xpViewModel.stopListening()
             }
         }
     }

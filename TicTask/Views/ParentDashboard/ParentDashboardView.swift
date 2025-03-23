@@ -21,23 +21,20 @@ struct ParentDashboardView: View {
                     
                     NotificationSection(title: "Notiser", icon: "bell", color: "#FFC107")
                     
-                    DashboardCard(title: "XP per dag", icon: "chart.line.uptrend.xyaxis", color: "#3F51B5") {
-                        ChildrenXPPerDayChartView()
-                    }
-
-
-                    DashboardCard(title: "Mina barn", icon: "person.crop.circle", color: "#4CAF50") {
+                    DashboardCard(title: "Poäng att handla för", icon: "person.crop.circle", color: "#4CAF50") {
                         if !authViewModel.childrenUsers.isEmpty {
                             ChildrenProgressView(children: authViewModel.childrenUsers)
                         }
                     }
                     
-                    DashboardCard(title: "Barnens uppgifter", icon: "task", color: "#FF9800") {
-                        TaskOverviewView()
+                    DashboardCard(title: "Veckans uppgifter", icon: "chart.bar.xaxis", color: "#3F51B5") {
+                        TaskProgressPerChildView()
                     }
-                    DashboardCard(title: "Veckans statistik", icon: "chart.bar", color: "#2196F3") {
-                        WeeklyTaskStatsView()
+                    
+                    DashboardCard(title: "Insamlad XP", icon: "chart.line.uptrend.xyaxis", color: "#3F51B5") {
+                        ChildrenXPPerDayChartView()
                     }
+
                 }
                 .padding()
             }

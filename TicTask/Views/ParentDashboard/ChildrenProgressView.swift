@@ -24,7 +24,6 @@ struct ChildrenProgressView: View {
                             .foregroundColor(.blue)
                             .frame(width: 80, height: 30, alignment: .trailing)
                     }
-                    .padding()
                 }
             }
     }

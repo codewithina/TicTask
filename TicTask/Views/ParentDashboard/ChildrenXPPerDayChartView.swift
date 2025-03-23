@@ -12,6 +12,12 @@ struct ChildrenXPPerDayChartView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var selectedChild: String? = nil
 
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM"
+        return formatter
+    }()
+
     var body: some View {
         VStack(alignment: .leading) {
             if xpViewModel.xpPerDay.isEmpty {
@@ -34,24 +40,24 @@ struct ChildrenXPPerDayChartView: View {
                 Chart {
                     ForEach(filtered) { item in
                         BarMark(
-                            x: .value("Datum", item.date),
+                            x: .value("Datum", dateFormatter.string(from: item.date)),
                             y: .value("XP", item.xp)
                         )
                         .foregroundStyle(by: .value("Barn", item.childName))
                     }
                 }
+                .chartYAxis {
+                    AxisMarks(position: .leading)
+                }
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day)) { value in
+                    AxisMarks { value in
                         AxisGridLine()
                         AxisTick()
-                        AxisValueLabel(format: .dateTime.day().month(.abbreviated))
+                        AxisValueLabel()
                     }
                 }
                 .frame(height: 250)
             }
-        }
-        .onDisappear {
-            xpViewModel.stopListeningForXPPerDay()
         }
     }
 }
