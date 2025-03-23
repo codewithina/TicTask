@@ -51,6 +51,8 @@ struct RewardsView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
 
+                            let canAfford = (authViewModel.user?.xp ?? 0) >= reward.xpCost
+
                             Button(action: {
                                 selectedReward = reward
                                 showConfirmation = true
@@ -58,10 +60,11 @@ struct RewardsView: View {
                                 Text("Köp")
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(Color.green)
+                                    .background(canAfford ? Color.green : Color.gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
+                            .disabled(!canAfford)
                         }
                         .padding(.vertical, 5)
                     }
