@@ -12,6 +12,7 @@ struct ParentDashboardView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
+    @EnvironmentObject var xpViewModel: XPViewModel
     
     var body: some View {
         NavigationStack {
@@ -20,6 +21,11 @@ struct ParentDashboardView: View {
                     
                     NotificationSection(title: "Notiser", icon: "bell", color: "#FFC107")
                     
+                    DashboardCard(title: "XP per dag", icon: "chart.line.uptrend.xyaxis", color: "#3F51B5") {
+                        ChildrenXPPerDayChartView()
+                    }
+
+
                     DashboardCard(title: "Mina barn", icon: "person.crop.circle", color: "#4CAF50") {
                         if !authViewModel.childrenUsers.isEmpty {
                             ChildrenProgressView(children: authViewModel.childrenUsers)
