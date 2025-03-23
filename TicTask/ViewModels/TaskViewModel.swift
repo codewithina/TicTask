@@ -207,7 +207,8 @@ class TaskViewModel: ObservableObject {
             for childID in children {
                 TaskService.shared.listenForTasks(for: childID) { newTasks in
                     DispatchQueue.main.async {
-                        self.childrenTasks = newTasks
+                        self.childrenTasks.removeAll { $0.assignedTo == childID }
+                        self.childrenTasks.append(contentsOf: newTasks)
                     }
                 }
             }
