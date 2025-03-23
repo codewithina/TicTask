@@ -9,30 +9,28 @@ import SwiftUI
 
 struct UpcomingTaskView: View {
     var task: Task
-
+    
     var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
-                ZStack {
-                    Circle()
-                        .fill(Color(hex: task.colorHex).opacity(0.2))
-                        .frame(width: 50, height: 50)
-                    
-                    Image(systemName: task.iconName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 25, height: 25)
-                        .foregroundColor(Color(hex: task.colorHex))
-                }
-
-                VStack(alignment: .leading) {
-                    Text(task.title)
-                        .font(.headline)
-                    Text(task.deadline?.formatted(date: .abbreviated, time: .omitted) ?? "Ingen deadline")
-                        .font(.subheadline)
-                        .foregroundColor(.red)
-                }
+                Text(task.title)
                 Spacer()
+                
+                if let deadline = task.deadline {
+                    let now = Date()
+                    let twoDaysFromNow = Calendar.current.date(byAdding: .day, value: 2, to: now)!
+                    
+                    if deadline < now {
+                        Text("Försenad ⚠️")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    } else if deadline < twoDaysFromNow {
+                        Text("Snart ⏳")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
             }
-            .padding()
+        }
     }
 }
