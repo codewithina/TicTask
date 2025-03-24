@@ -26,6 +26,10 @@ struct ParentDashboardView: View {
                             ChildrenProgressView(children: authViewModel.childrenUsers)
                         }
                     }
+                    
+                    DashboardCard(title: "Deadline-status", icon: "exclamationmark.circle", color: "#F44336") {
+                        TaskDeadlineStatusView()
+                    }
 
                     DashboardCard(title: "Veckans uppgifter", icon: "chart.bar.xaxis", color: "#64B5F6") {
                         TaskProgressPerChildView()
