@@ -16,12 +16,12 @@ struct ChildrenProgressView: View {
                     HStack {
                         VStack(alignment: .leading) {
                             Text(child.name)
-                                .font(.headline)
+                                .font(.subheadline)
                         }
                         Spacer()
                         Text("\(child.xp ?? 0) XP")
-                            .font(.subheadline)
-                            .foregroundColor(.blue)
+                            .font(.headline)
+                            .foregroundColor(Color(hex: "#81C784"))
                             .frame(width: 80, height: 30, alignment: .trailing)
                     }
                 }
