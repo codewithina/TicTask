@@ -22,10 +22,13 @@ class AuthService {
             }
             guard let userID = result?.user.uid else { return }
             
+            let now = Date()
+            
             var userData: [String: Any] = [
                 "name": name,
                 "email": email,
-                "role": role
+                "role": role,
+                "registeredAt": Timestamp(date: now)
             ]
             
             if role == "child" {
@@ -40,7 +43,7 @@ class AuthService {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    let user = User(id: userID, name: name, email: email, role: role, xp: role == "child" ? 0 : nil, totalXP: role == "child" ? 0 : nil, parentIDs: parentIDs ?? [], children: children ?? [])
+                    let user = User(id: userID, registeredAt: now, name: name, email: email, role: role, xp: role == "child" ? 0 : nil, totalXP: role == "child" ? 0 : nil, parentIDs: parentIDs ?? [], children: children ?? [])
                     
                     let notificationRef = self.db.collection("users").document(userID).collection("notifications")
                     
@@ -110,6 +113,7 @@ class AuthService {
                 if let data = snapshot?.data() {
                     let user = User(
                         id: firebaseUser.uid,
+                        registeredAt: (data["registeredAt"] as? Timestamp)?.dateValue() ?? Date(),
                         name: data["name"] as? String ?? "",
                         email: data["email"] as? String ?? "",
                         role: data["role"] as? String ?? "",

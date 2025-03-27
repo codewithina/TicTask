@@ -33,20 +33,20 @@ class AuthViewModel: ObservableObject {
                 case .success(let user):
                     self.user = user
                     self.isAuthenticated = true
-                    
+
                     if user.role == "parent" {
                         self.loadAndListenToChildren(for: user)
                     }
-                    
+
                     if user.role == "child" {
                         self.loadAndListenToParents(for: user)
                     }
-                    
+
                     if user.role == "parent" || user.role == "child" {
                         self.startListeningForUserChanges()
                         self.taskViewModel?.startListeningForTasks(for: user)
                     }
-                    
+
                 case .failure(let error):
                     print("🔴 Registrering misslyckades: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
@@ -159,8 +159,11 @@ class AuthViewModel: ObservableObject {
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self, let data = snapshot?.data() else { return }
                 
+                let registeredAt = (data["registeredAt"] as? Timestamp)?.dateValue() ?? Date()
+
                 let updatedUser = User(
                     id: userID,
+                    registeredAt: registeredAt,
                     name: data["name"] as? String ?? "Okänt namn",
                     email: data["email"] as? String ?? "Ingen e-post",
                     role: data["role"] as? String ?? "unknown",
@@ -175,6 +178,7 @@ class AuthViewModel: ObservableObject {
                 }
             }
     }
+
     
     
     func addExistingChildByID(childID: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -266,8 +270,11 @@ class AuthViewModel: ObservableObject {
                         return
                     }
                     
+                    let registeredAt = (data["registeredAt"] as? Timestamp)?.dateValue() ?? Date()
+                    
                     let child = User(
                         id: childID,
+                        registeredAt: registeredAt,
                         name: data["name"] as? String ?? "Okänt namn",
                         email: data["email"] as? String ?? "Ingen e-post",
                         role: data["role"] as? String ?? "unknown",

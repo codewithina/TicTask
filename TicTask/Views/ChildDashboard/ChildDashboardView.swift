@@ -28,9 +28,10 @@ struct ChildDashboardView: View {
                     DashboardCard(title: "XP-händelser", icon: "sparkles", color: "#9C27B0") {
                         XPLogListView(userID: authViewModel.user?.id ?? "")
                     }
-                    
-                    DashboardCard(title: "Streak", icon: "flame.fill", color: "#FF5722") {
-                        StreakSummaryView(userID: authViewModel.user?.id ?? "")
+                    if let user = authViewModel.user {
+                        DashboardCard(title: "Streak", icon: "flame.fill", color: "#FF5722") {
+                            StreakSummaryView(user: user)
+                        }
                     }
                     
                     let upcomingTasks = getUpcomingTasks()
