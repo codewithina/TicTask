@@ -19,7 +19,7 @@ class XPBonusManager {
            Calendar.current.dateComponents([.day], from: completedAt, to: deadline).day ?? 0 >= 2 {
             let extraXP = Int(Double(task.xpReward) * 0.2)
             bonusEvents.append(
-                XPEvent(title: "Läxan klar före deadline ⏳", xp: extraXP, date: completedAt, type: .deadlineEarly)
+                XPEvent(title: "Läxan klar 2 dagar före deadline ⏳", xp: extraXP, date: completedAt, type: .deadlineEarly)
             )
         }
 
@@ -36,20 +36,49 @@ class XPBonusManager {
 
         // Streak - done tasks 3 days
         let calendar = Calendar.current
-        let last3Days = (0..<3).map { calendar.date(byAdding: .day, value: -$0, to: completedAt)! }
 
-        let streakOK = last3Days.allSatisfy { day in
-            allCompletedTasks.contains(where: {
-                guard let completed = $0.completedDate else { return false }
-                return calendar.isDate(completed, inSameDayAs: day)
-            })
+        // Sort completed unique days
+        var uniqueDays: [Date] = []
+
+        for task in allCompletedTasks.sorted(by: { ($0.completedDate ?? Date.distantPast) < ($1.completedDate ?? Date.distantPast) }) {
+            guard let completedDate = task.completedDate else { continue }
+            let day = calendar.startOfDay(for: completedDate)
+
+            if uniqueDays.last != day {
+                uniqueDays.append(day)
+            }
         }
 
-        if streakOK {
+        // Count streak
+        var streak = 1
+        for i in stride(from: uniqueDays.count - 2, through: 0, by: -1) {
+            let prevDay = uniqueDays[i]
+            let nextDay = uniqueDays[i + 1]
+            
+            if let expectedNextDay = calendar.date(byAdding: .day, value: 1, to: prevDay),
+               calendar.isDate(expectedNextDay, inSameDayAs: nextDay) {
+                streak += 1
+            } else {
+                break
+            }
+        }
+
+        // Check if bonus (3, 6, 9...)
+        if streak > 0, streak % 3 == 0 {
             bonusEvents.append(
-                XPEvent(title: "🔥 Streak! 3 dagar i rad 🏆", xp: 10, date: completedAt, type: .streak)
+                XPEvent(title: "🔥 \(streak) dagar i rad! 🏆", xp: 10, date: completedAt, type: .streak)
             )
         }
+        
+        // Early bird bonus – läxa klar före kl. 18
+        let deadlineHour = 18
+        if let earlyDeadline = calendar.date(bySettingHour: deadlineHour, minute: 0, second: 0, of: completedAt),
+           completedAt < earlyDeadline {
+            bonusEvents.append(
+                XPEvent(title: "⏰ Tidig läxa! Bra jobbat 💪", xp: 5, date: completedAt, type: .earlyBird)
+            )
+        }
+
 
         // Sum bonus XP & update XP once
         let totalBonusXP = bonusEvents.reduce(0) { $0 + $1.xp }

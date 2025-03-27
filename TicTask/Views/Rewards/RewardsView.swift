@@ -9,21 +9,21 @@ import SwiftUI
 struct RewardsView: View {
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
-
+    
     @State private var showConfirmation = false
     @State private var selectedReward: Reward?
-
+    
     @State private var animateXPLoss = false
     @State private var showXPDeductionText = false
     @State private var deductedXP: Int = 0
     @State private var xpShakeAngle: Double = 0
-
+    
     @State private var showFallingCoins = false
-
+    
     var isChild: Bool {
         authViewModel.user?.role == "child"
     }
-
+    
     var body: some View {
         ZStack {
             NavigationStack {
@@ -39,27 +39,27 @@ struct RewardsView: View {
                                     Circle()
                                         .fill(Color(hex: reward.colorHex).opacity(0.2))
                                         .frame(width: 50, height: 50)
-
+                                    
                                     Image(systemName: reward.iconName)
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 25, height: 25)
                                         .foregroundColor(Color(hex: reward.colorHex))
                                 }
-
+                                
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(reward.title)
                                         .font(.headline)
                                         .lineLimit(1)
-
+                                    
                                     Text(reward.description)
                                         .font(.subheadline)
                                         .lineLimit(2)
-
+                                    
                                     Text("XP: \(reward.xpCost)")
                                         .font(.subheadline)
                                         .foregroundColor(.blue)
-
+                                    
                                     if isChild {
                                         Text("Tillagd av: \(authViewModel.parentNames[reward.createdBy] ?? "Förälder")")
                                             .font(.subheadline)
@@ -67,9 +67,9 @@ struct RewardsView: View {
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                                
                                 let canAfford = (authViewModel.user?.xp ?? 0) >= reward.xpCost
-
+                                
                                 Button(action: {
                                     selectedReward = reward
                                     showConfirmation = true
@@ -94,7 +94,7 @@ struct RewardsView: View {
                             HStack(spacing: 5) {
                                 Image(systemName: "star.circle.fill")
                                     .foregroundColor(.yellow)
-
+                                
                                 Text("\(authViewModel.user?.xp ?? 0) XP")
                                     .font(.headline)
                             }
@@ -105,7 +105,7 @@ struct RewardsView: View {
                             .scaleEffect(animateXPLoss ? 1.15 : 1.0)
                             .animation(.default, value: xpShakeAngle)
                             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: animateXPLoss)
-
+                            
                             if showXPDeductionText {
                                 Text("-\(deductedXP) XP")
                                     .font(.caption2.bold())
@@ -127,7 +127,7 @@ struct RewardsView: View {
                     Button("Ja, köp", role: .destructive) {
                         if let userID = authViewModel.user?.id, let reward = selectedReward {
                             rewardViewModel.redeemReward(reward: reward, userID: userID)
-
+                            
                             // XP shake + -XP + coins
                             deductedXP = reward.xpCost
                             withAnimation {
@@ -135,7 +135,7 @@ struct RewardsView: View {
                                 showXPDeductionText = true
                                 showFallingCoins = true
                             }
-
+                            
                             // Shake animation
                             withAnimation(.default.speed(3)) { xpShakeAngle = -20 }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -153,7 +153,7 @@ struct RewardsView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation(.default.speed(3)) { xpShakeAngle = 0 }
                             }
-
+                            
                             // Close after 1.5 sek
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                 withAnimation {
@@ -171,7 +171,7 @@ struct RewardsView: View {
                     }
                 }
             }
-
+            
             if showFallingCoins {
                 FallingCoinsView()
                     .transition(.opacity)
@@ -184,7 +184,7 @@ struct FallingCoinsView: View {
     @State private var coinOffsets: [CGSize] = Array(repeating: .zero, count: 12)
     @State private var opacities: [Double] = Array(repeating: 1.0, count: 12)
     @State private var startX: [CGFloat] = (0..<12).map { _ in CGFloat.random(in: -20...20) }
-
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {

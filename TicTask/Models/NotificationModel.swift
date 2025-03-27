@@ -12,7 +12,7 @@ struct NotificationModel: Identifiable, Codable {
     @DocumentID var id: String?
     let message: String
     let timestamp: Date
-
+    
     enum CodingKeys: String, CodingKey {
         case id
         case message

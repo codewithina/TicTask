@@ -231,46 +231,49 @@ class TaskViewModel: ObservableObject {
         }
     }
     
-    func calculateStreakDays(for userID: String) -> Int {
+    func calculateStreakDays(for user: User) -> Int {
         let calendar = Calendar.current
-        let now = Date()
+        let today = calendar.startOfDay(for: Date())
+        let userID = user.id ?? ""
         
-        let relevantTasks = tasks.filter {
-            $0.assignedTo == userID && $0.deadline != nil
+        // deadline today/earlier
+        let pastTasks = tasks.filter {
+            $0.assignedTo == userID &&
+            ($0.deadline ?? .distantFuture) <= today
         }
-        
-        if relevantTasks.isEmpty {
-            return 0
-        }
-        
-        var streakDays = 0
-        var currentDate = calendar.startOfDay(for: now)
-        
-        for _ in 0..<30 {
-            let tasksDueToday = relevantTasks.filter {
-                guard let deadline = $0.deadline else { return false }
-                return calendar.isDate(deadline, inSameDayAs: currentDate)
-            }
-            
-            let missedTask = tasksDueToday.contains { !$0.isCompleted && ($0.deadline ?? now) <= currentDate }
-            if missedTask {
-                break
-            }
-            
-            if tasksDueToday.isEmpty {
-                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
-                continue
-            }
-            
-            let allDone = tasksDueToday.allSatisfy { $0.isCompleted }
-            if allDone {
-                streakDays += 1
-                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+
+        // latest missed task
+        var latestFailedTaskCompletionDate: Date? = nil
+
+        for task in pastTasks {
+            guard let deadline = task.deadline else { continue }
+
+            if let completed = task.completedDate {
+                if completed > deadline {
+                    if latestFailedTaskCompletionDate == nil || completed > latestFailedTaskCompletionDate! {
+                        latestFailedTaskCompletionDate = completed
+                    }
+                }
             } else {
-                break
+                // task never done
+                if latestFailedTaskCompletionDate == nil || today > latestFailedTaskCompletionDate! {
+                    latestFailedTaskCompletionDate = today
+                }
             }
         }
-        
-        return streakDays
+
+        let streakStartDate: Date
+
+        if let failedDate = latestFailedTaskCompletionDate {
+            // streak start one day after completed
+            streakStartDate = calendar.startOfDay(for: failedDate)
+        } else {
+            // 0 missed days, count from registered
+            streakStartDate = calendar.startOfDay(for: user.registeredAt)
+        }
+
+        // count from streakStartDate 
+        let streak = calendar.dateComponents([.day], from: streakStartDate, to: today).day ?? 0
+        return max(0, streak)
     }
 }
