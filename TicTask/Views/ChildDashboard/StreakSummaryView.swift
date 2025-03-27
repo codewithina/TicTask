@@ -8,10 +8,10 @@ import SwiftUI
 struct StreakSummaryView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     let user: User
-
+    
     @State private var streakDays = 0
     @State private var lastUpdatedDay = Calendar.current.startOfDay(for: Date())
-
+    
     var body: some View {
         VStack {
             if !taskViewModel.isListening {
@@ -24,13 +24,13 @@ struct StreakSummaryView: View {
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    if taskViewModel.isListening && !taskViewModel.tasks.isEmpty {
-                        updateStreak()
-                    }
+                if taskViewModel.isListening && !taskViewModel.tasks.isEmpty {
+                    updateStreak()
                 }
+            }
         }
     }
-
+    
     private func updateStreak() {
         streakDays = taskViewModel.calculateStreakDays(for: user)
         lastUpdatedDay = Calendar.current.startOfDay(for: Date())

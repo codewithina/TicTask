@@ -51,9 +51,6 @@ struct ChildDashboardView: View {
                 }
                 .padding()
             }
-            .background(
-                BackgroundView()
-            )
             
             /* .navigationBarItems(trailing: HStack {
              Image(systemName: "star.circle.fill")
@@ -75,7 +72,7 @@ struct ChildDashboardView: View {
                 notificationViewModel.stopListening()
                 xpViewModel.stopListening()
             }
-        }
+        }.background(BackgroundView().ignoresSafeArea())
     }
     
     private func getUpcomingTasks() -> [Task] {
