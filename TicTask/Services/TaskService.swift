@@ -38,7 +38,13 @@ class TaskService {
     }
     
     func updateTaskStatus(taskID: String, status: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        db.collection("tasks").document(taskID).updateData(["status": status]) { error in
+        var updateData: [String: Any] = ["status": status]
+
+        if status == "completed" {
+            updateData["completedDate"] = Timestamp(date: Date())
+        }
+
+        db.collection("tasks").document(taskID).updateData(updateData) { error in
             if let error = error {
                 completion(.failure(error))
             } else {
@@ -46,6 +52,7 @@ class TaskService {
             }
         }
     }
+
     
     func updateUserXP(userID: String, xpReward: Int, completion: @escaping (Result<Void, Error>) -> Void) {
         let userRef = db.collection("users").document(userID)
@@ -59,20 +66,28 @@ class TaskService {
             
             let currentXP = snapshot?.data()?["xp"] as? Int ?? 0
             let newXP = currentXP + xpReward
-            let alltimeXP = snapshot?.data()?["totalXP"] as? Int ?? 0
-            let newAlltimeXP = alltimeXP + xpReward
+            let currentTotalXP = snapshot?.data()?["totalXP"] as? Int ?? 0
+            let newTotalXP = currentTotalXP + xpReward
             
-            userRef.updateData(["xp": newXP, "totalXP": newAlltimeXP]) { error in
+            userRef.updateData(["xp": newXP, "totalXP": newTotalXP]) { error in
                 if let error = error {
                     print("🔴 Misslyckades att uppdatera XP: \(error.localizedDescription)")
                     completion(.failure(error))
                 } else {
                     print("✅ Barnets XP uppdaterat! Ny XP: \(newXP)")
+                    
+                    XPBonusManager.shared.checkForLevelUp(
+                        userID: userID,
+                        oldTotalXP: currentTotalXP,
+                        newTotalXP: newTotalXP
+                    )
+
                     completion(.success(()))
                 }
             }
         }
     }
+
     
     func listenForTasks(for userID: String, completion: @escaping ([Task]) -> Void) {
         let tasksCollection = db.collection("tasks")

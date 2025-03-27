@@ -14,6 +14,7 @@ struct Task: Identifiable, Codable {
     let deadline: Date?
     let xpReward: Int
     var status: String // "pending" or "completed"
+    var completedDate: Date? = nil
     let assignedTo: String // Child ID
     let createdBy: String // Created by child or parent
     let iconName: String // SF Symbol-name (ex: "star.fill")

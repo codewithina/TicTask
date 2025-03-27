@@ -25,6 +25,7 @@ class TaskViewModel: ObservableObject {
             deadline: deadline,
             xpReward: xpReward,
             status: "pending",
+            completedDate: nil,
             assignedTo: assignedTo,
             createdBy: createdBy,
             iconName: iconName,
@@ -35,7 +36,6 @@ class TaskViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    print("✅ Läxa tillagd!")
                     
                     guard let notificationViewModel = self.notificationViewModel else {
                         return
@@ -47,7 +47,6 @@ class TaskViewModel: ObservableObject {
                     
                     // If parent adds a task  → Sen notification to child
                     if createdBy != assignedTo {
-                        print("📩 Skickar notis till barnet: \(assignedTo)")
                         notificationViewModel.sendNotification(
                             to: assignedTo,
                             message: "Din förälder har lagt till en ny läxa: \(title)"
@@ -60,7 +59,6 @@ class TaskViewModel: ObservableObject {
                             print("⚠️ Barnet har inga kopplade föräldrar. Ingen notis skickas.")
                         } else {
                             for parentID in parentIDs {
-                                print("📩 Skickar notis till förälder: \(parentID)")
                                 notificationViewModel.sendNotification(
                                     to: parentID,
                                     message: "\(creatorName) har lagt till en ny läxa: \(title)"
@@ -83,19 +81,16 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success:
                     self.tasks.removeAll { $0.id == task.id }
-                    print("✅ Uppgiften har tagits bort från listan!")
                     
                     guard let user = self.authViewModel?.user else { return }
                     let userName = user.name
                     
                     if user.id == task.createdBy {
-                        print("📩 Skickar notis till barnet: \(task.assignedTo)")
                         self.notificationViewModel?.sendNotification(
                             to: task.assignedTo,
                             message: "\(userName) har tagit bort läxan \"\(task.title)\"."
                         )
                     } else {
-                        print("📩 Skickar notis till förälder: \(task.createdBy)")
                         self.notificationViewModel?.sendNotification(
                             to: task.createdBy,
                             message: "\(userName) har tagit bort läxan \"\(task.title)\"."
@@ -114,12 +109,43 @@ class TaskViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    print("✅ Läxa markerad som klar!")
+                    
+                    guard let user = self.authViewModel?.user else { return }
+                    
+                    let now = Date()
+                    
+                    if user.role == "child" {
+                        if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
+                            self.tasks[index].status = "completed"
+                            self.tasks[index].completedDate = now
+                        }
+                    } else if user.role == "parent" {
+                        if let index = self.childrenTasks.firstIndex(where: { $0.id == task.id }) {
+                            self.childrenTasks[index].status = "completed"
+                            self.childrenTasks[index].completedDate = now
+                        }
+                    }
+                    
                     self.fetchTaskXPAndUpdateUser(taskID: task.id)
                     
-                    guard let user = self.authViewModel?.user else {
-                        return
-                    }
+                    let baseXPEvent = XPEvent(
+                        title: "Klarade \"\(task.title)\" 🚀",
+                        xp: task.xpReward,
+                        date: now,
+                        type: .baseTask
+                    )
+                    
+                    XPLogService.shared.logXPEvent(userID: user.id ?? "", event: baseXPEvent)
+                    
+                    XPBonusManager.shared.applyBonuses(
+                        for: task,
+                        user: user,
+                        completedAt: now,
+                        allCompletedTasks: self.tasks.filter {
+                            $0.assignedTo == user.id && $0.isCompleted
+                        }
+                    )
+                    
                     let userName = user.name
                     
                     // If child complete task → Send notification to parents
@@ -129,7 +155,6 @@ class TaskViewModel: ObservableObject {
                             print("⚠️ Barnet har inga kopplade föräldrar. Ingen notis skickas.")
                         } else {
                             for parentID in parentIDs {
-                                print("📩 Skickar notis till förälder: \(parentID)")
                                 self.notificationViewModel?.sendNotification(
                                     to: parentID,
                                     message: "\(userName) har markerat läxan \"\(task.title)\" som klar!"
@@ -140,7 +165,6 @@ class TaskViewModel: ObservableObject {
                     
                     // If parent complete task → Send notification to child
                     if user.role == "parent" {
-                        print("📩 Skickar notis till barnet: \(task.assignedTo)")
                         self.notificationViewModel?.sendNotification(
                             to: task.assignedTo,
                             message: "\(user.name) har markerat läxan \"\(task.title)\" som klar!"
@@ -154,15 +178,14 @@ class TaskViewModel: ObservableObject {
     }
     
     func startListeningForTasks(for user: User) {
-        if isListening {
-            return
-        }
-        isListening = true
+        tasks = []
+        childrenTasks = []
         
         if let userID = user.id {
             TaskService.shared.listenForTasks(for: userID) { newTasks in
                 DispatchQueue.main.async {
                     self.tasks = newTasks
+                    self.isListening = true
                 }
             }
         } else {
@@ -170,16 +193,17 @@ class TaskViewModel: ObservableObject {
         }
         
         if user.role == "parent", let children = user.children {
-            print("📡 Startar lyssnare för barnens uppgifter...")
             for childID in children {
                 TaskService.shared.listenForTasks(for: childID) { newTasks in
                     DispatchQueue.main.async {
-                        self.childrenTasks = newTasks
+                        self.childrenTasks.removeAll { $0.assignedTo == childID }
+                        self.childrenTasks.append(contentsOf: newTasks)
                     }
                 }
             }
         }
     }
+    
     
     private func fetchTaskXPAndUpdateUser(taskID: String) {
         let taskRef = Firestore.firestore().collection("tasks").document(taskID)
@@ -205,5 +229,48 @@ class TaskViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    func calculateStreakDays(for userID: String) -> Int {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        let relevantTasks = tasks.filter {
+            $0.assignedTo == userID && $0.deadline != nil
+        }
+        
+        if relevantTasks.isEmpty {
+            return 0
+        }
+        
+        var streakDays = 0
+        var currentDate = calendar.startOfDay(for: now)
+        
+        for _ in 0..<30 {
+            let tasksDueToday = relevantTasks.filter {
+                guard let deadline = $0.deadline else { return false }
+                return calendar.isDate(deadline, inSameDayAs: currentDate)
+            }
+            
+            let missedTask = tasksDueToday.contains { !$0.isCompleted && ($0.deadline ?? now) <= currentDate }
+            if missedTask {
+                break
+            }
+            
+            if tasksDueToday.isEmpty {
+                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                continue
+            }
+            
+            let allDone = tasksDueToday.allSatisfy { $0.isCompleted }
+            if allDone {
+                streakDays += 1
+                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+            } else {
+                break
+            }
+        }
+        
+        return streakDays
     }
 }

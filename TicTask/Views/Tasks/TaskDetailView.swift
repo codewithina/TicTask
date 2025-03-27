@@ -78,7 +78,7 @@ struct TaskDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    if !task.isCompleted {
+                    if !task.isCompleted && !isCompleted{
                         Button(action: {
                             withAnimation {
                                 isCompleted = true
@@ -112,12 +112,6 @@ struct TaskDetailView: View {
                             .foregroundColor(.gray)
                             .cornerRadius(10)
                             .padding(.horizontal)
-                            .overlay(
-                                StarExplosionView()
-                                    .opacity(showStars ? 1 : 0)
-                                    .scaleEffect(showStars ? 1 : 0.5)
-                                    .animation(.easeOut(duration: 0.5), value: showStars)
-                            )
                     }
                 }
             }
@@ -158,6 +152,13 @@ struct TaskDetailView: View {
                 dismiss()
             }
             Button("Avbryt", role: .cancel) { }
+        }
+        .onAppear {
+            isCompleted = task.isCompleted
+        }
+
+        .onDisappear {
+            dismiss()
         }
     }
 }

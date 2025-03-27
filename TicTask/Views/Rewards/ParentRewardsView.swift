@@ -20,36 +20,39 @@ struct ParentRewardsView: View {
                         .foregroundColor(.gray)
                         .padding()
                 } else {
-                    List(rewardViewModel.createdRewards) { reward in
-                        HStack(spacing: 15) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(hex: reward.colorHex).opacity(0.2))
-                                    .frame(width: 50, height: 50)
+                    List {
+                        ForEach(rewardViewModel.createdRewards) { reward in
+                            HStack(spacing: 15) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: reward.colorHex).opacity(0.2))
+                                        .frame(width: 50, height: 50)
 
-                                Image(systemName: reward.iconName)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 25, height: 25)
-                                    .foregroundColor(Color(hex: reward.colorHex))
+                                    Image(systemName: reward.iconName)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 25, height: 25)
+                                        .foregroundColor(Color(hex: reward.colorHex))
+                                }
+
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(reward.title)
+                                        .font(.headline)
+                                        .lineLimit(1)
+
+                                    Text(reward.description)
+                                        .font(.subheadline)
+                                        .lineLimit(2)
+
+                                    Text("XP: \(reward.xpCost)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.blue)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
-
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(reward.title)
-                                    .font(.headline)
-                                    .lineLimit(1)
-
-                                Text(reward.description)
-                                    .font(.subheadline)
-                                    .lineLimit(2)
-
-                                Text("XP: \(reward.xpCost)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.blue)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 5)
                         }
-                        .padding(.vertical, 5)
+                        .onDelete(perform: delete)
                     }
                 }
             }
@@ -69,6 +72,13 @@ struct ParentRewardsView: View {
                     rewardViewModel.startListeningForCreatedRewards(for: parentID)
                 }
             }
+        }
+    }
+    
+    func delete(at offsets: IndexSet) {
+        for index in offsets {
+            let reward = rewardViewModel.createdRewards[index]
+            rewardViewModel.deleteReward(reward: reward)
         }
     }
 }
