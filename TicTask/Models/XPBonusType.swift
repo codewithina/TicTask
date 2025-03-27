@@ -15,17 +15,19 @@ enum XPBonusType: String, Codable {
     case dailyCombo
     case surprise
     case levelUp
+    case earlyBird
     
     var priority: Int {
-            switch self {
-            case .baseTask: return 0
-            case .streak: return 1
-            case .deadlineEarly: return 2
-            case .dailyCombo: return 3
-            case .surprise: return 4
-            case .levelUp: return 5
-            }
+        switch self {
+        case .baseTask: return 0
+        case .streak: return 1
+        case .deadlineEarly: return 2
+        case .dailyCombo: return 3
+        case .surprise: return 4
+        case .levelUp: return 5
+        case .earlyBird: return 6
         }
+    }
 }
 
 struct XPEvent: Identifiable, Codable {

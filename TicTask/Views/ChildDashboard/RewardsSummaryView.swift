@@ -9,9 +9,9 @@ import SwiftUI
 
 struct RewardsSummaryView: View {
     var rewardCount: Int
-
+    
     var body: some View {
-            Text("\(rewardCount) belöningar att köpa")
-                .padding()
+        Text("\(rewardCount) belöningar att köpa")
+            .padding()
     }
 }

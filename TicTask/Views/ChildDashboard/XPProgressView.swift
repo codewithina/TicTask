@@ -10,16 +10,16 @@ struct XPProgressView: View {
     let allTimeXP: Int
     let spendableXP: Int
     let maxXPPerLevel: Int
-
+    
     var currentLevel: Int {
         return (allTimeXP / maxXPPerLevel) + 1
     }
-
+    
     var progress: CGFloat {
         let xpInCurrentLevel = allTimeXP % maxXPPerLevel
         return CGFloat(xpInCurrentLevel) / CGFloat(maxXPPerLevel)
     }
-
+    
     var body: some View {
         VStack(spacing: 20) {
             ZStack {
@@ -37,13 +37,13 @@ struct XPProgressView: View {
                     .rotationEffect(.degrees(180))
                     .offset(y:30)
                 
-                    Text("\(currentLevel)")
-                        .font(.system(size: 50, weight: .bold))
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                        .offset(y: 25)
+                Text("\(currentLevel)")
+                    .font(.system(size: 50, weight: .bold))
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                    .offset(y: 25)
             }
-
+            
             HStack {
                 Image(systemName: "star.circle.fill")
                     .foregroundColor(.yellow)

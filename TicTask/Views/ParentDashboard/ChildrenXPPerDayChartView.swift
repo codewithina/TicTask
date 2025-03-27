@@ -11,13 +11,13 @@ struct ChildrenXPPerDayChartView: View {
     @EnvironmentObject var xpViewModel: XPViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var selectedChild: String? = nil
-
+    
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM"
         return formatter
     }()
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             if xpViewModel.xpPerDay.isEmpty {
@@ -32,11 +32,11 @@ struct ChildrenXPPerDayChartView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.bottom, 8)
-
+                
                 let filtered = xpViewModel.xpPerDay.filter {
                     selectedChild == nil || $0.childName == selectedChild
                 }
-
+                
                 Chart {
                     ForEach(filtered) { item in
                         BarMark(
