@@ -46,7 +46,7 @@ struct DashboardCard<Content: View>: View {
         .padding()
         .background(RoundedRectangle(cornerRadius: 12)
             .fill(Color(hex: color).opacity(0.1))
-                        .shadow(radius: 3))
+            .shadow(radius: 3))
         .padding(.horizontal)
     }
 }

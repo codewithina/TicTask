@@ -19,7 +19,7 @@ struct Task: Identifiable, Codable {
     let createdBy: String // Created by child or parent
     let iconName: String // SF Symbol-name (ex: "star.fill")
     let colorHex: String // Color in hex (ex: "#FF5733")
-
+    
     // Return if task is done or not
     var isCompleted: Bool {
         return status == "completed"

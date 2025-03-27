@@ -39,11 +39,11 @@ class TaskService {
     
     func updateTaskStatus(taskID: String, status: String, completion: @escaping (Result<Void, Error>) -> Void) {
         var updateData: [String: Any] = ["status": status]
-
+        
         if status == "completed" {
             updateData["completedDate"] = Timestamp(date: Date())
         }
-
+        
         db.collection("tasks").document(taskID).updateData(updateData) { error in
             if let error = error {
                 completion(.failure(error))
@@ -52,7 +52,7 @@ class TaskService {
             }
         }
     }
-
+    
     
     func updateUserXP(userID: String, xpReward: Int, completion: @escaping (Result<Void, Error>) -> Void) {
         let userRef = db.collection("users").document(userID)
@@ -81,13 +81,13 @@ class TaskService {
                         oldTotalXP: currentTotalXP,
                         newTotalXP: newTotalXP
                     )
-
+                    
                     completion(.success(()))
                 }
             }
         }
     }
-
+    
     
     func listenForTasks(for userID: String, completion: @escaping ([Task]) -> Void) {
         let tasksCollection = db.collection("tasks")

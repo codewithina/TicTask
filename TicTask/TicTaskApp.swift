@@ -22,20 +22,20 @@ struct TicTaskApp: App {
     
     var body: some Scene {
         WindowGroup {
-                ContentView()
-                    .environmentObject(authViewModel)
-                    .environmentObject(taskViewModel)
-                    .environmentObject(rewardViewModel)
-                    .environmentObject(notificationViewModel)
-                    .environmentObject(xpViewModel)
-                    .onAppear {
-                        rewardViewModel.notificationViewModel = notificationViewModel
-                        rewardViewModel.authViewModel = authViewModel
-                        taskViewModel.notificationViewModel = notificationViewModel
-                        taskViewModel.authViewModel = authViewModel
-                        authViewModel.taskViewModel = taskViewModel
-                        authViewModel.xpViewModel = xpViewModel
-                    }
+            ContentView()
+                .environmentObject(authViewModel)
+                .environmentObject(taskViewModel)
+                .environmentObject(rewardViewModel)
+                .environmentObject(notificationViewModel)
+                .environmentObject(xpViewModel)
+                .onAppear {
+                    rewardViewModel.notificationViewModel = notificationViewModel
+                    rewardViewModel.authViewModel = authViewModel
+                    taskViewModel.notificationViewModel = notificationViewModel
+                    taskViewModel.authViewModel = authViewModel
+                    authViewModel.taskViewModel = taskViewModel
+                    authViewModel.xpViewModel = xpViewModel
+                }
         }
     }
 }

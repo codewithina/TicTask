@@ -20,8 +20,8 @@ struct XPLogListView: View {
                     xpViewModel.xpLog
                         .sorted {
                             $0.date == $1.date
-                                ? $0.type.priority < $1.type.priority
-                                : $0.date > $1.date
+                            ? $0.type.priority < $1.type.priority
+                            : $0.date > $1.date
                         }
                         .prefix(5)
                 ) { event in

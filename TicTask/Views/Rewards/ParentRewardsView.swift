@@ -11,7 +11,7 @@ struct ParentRewardsView: View {
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAddRewardView = false
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -27,23 +27,23 @@ struct ParentRewardsView: View {
                                     Circle()
                                         .fill(Color(hex: reward.colorHex).opacity(0.2))
                                         .frame(width: 50, height: 50)
-
+                                    
                                     Image(systemName: reward.iconName)
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 25, height: 25)
                                         .foregroundColor(Color(hex: reward.colorHex))
                                 }
-
+                                
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(reward.title)
                                         .font(.headline)
                                         .lineLimit(1)
-
+                                    
                                     Text(reward.description)
                                         .font(.subheadline)
                                         .lineLimit(2)
-
+                                    
                                     Text("XP: \(reward.xpCost)")
                                         .font(.subheadline)
                                         .foregroundColor(.blue)

@@ -75,7 +75,7 @@ class AuthViewModel: ObservableObject {
                     if user.role == "child" {
                         self.loadAndListenToParents(for: user)
                     }
-        
+                    
                     
                 case .failure(let error):
                     print("🔴 Inloggning misslyckades: \(error.localizedDescription)")
@@ -154,11 +154,11 @@ class AuthViewModel: ObservableObject {
             print("🚨 Ingen användare inloggad, kan inte starta lyssnaren.")
             return
         }
-
+        
         userListener = db.collection("users").document(userID)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self, let data = snapshot?.data() else { return }
-
+                
                 let updatedUser = User(
                     id: userID,
                     name: data["name"] as? String ?? "Okänt namn",
@@ -169,41 +169,41 @@ class AuthViewModel: ObservableObject {
                     parentIDs: data["parentIDs"] as? [String] ?? [],
                     children: data["children"] as? [String] ?? []
                 )
-
+                
                 DispatchQueue.main.async {
                     self.user = updatedUser
                 }
             }
     }
-
+    
     
     func addExistingChildByID(childID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let parentID = user?.id else {
             completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Ingen inloggad förälder."])))
             return
         }
-
+        
         let childRef = db.collection("users").document(childID)
         let parentRef = db.collection("users").document(parentID)
-
+        
         childRef.getDocument { document, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
             
-           // guard let data = document?.data(), let childName = data["name"] as? String
+            // guard let data = document?.data(), let childName = data["name"] as? String
             guard let data = document?.data(), data["name"] as? String != nil else {
                 completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Barn-ID hittades inte."])))
                 return
             }
-
-
+            
+            
             let batch = self.db.batch()
             
             batch.updateData(["parentIDs": FieldValue.arrayUnion([parentID])], forDocument: childRef)
             batch.updateData(["children": FieldValue.arrayUnion([childID])], forDocument: parentRef)
-
+            
             batch.commit { error in
                 if let error = error {
                     completion(.failure(error))
@@ -216,15 +216,15 @@ class AuthViewModel: ObservableObject {
     
     func removeChild(childID: String) {
         guard let parentID = user?.id else { return }
-
+        
         let childRef = db.collection("users").document(childID)
         let parentRef = db.collection("users").document(parentID)
-
+        
         let batch = db.batch()
-
+        
         batch.updateData(["parentIDs": FieldValue.arrayRemove([parentID])], forDocument: childRef)
         batch.updateData(["children": FieldValue.arrayRemove([childID])], forDocument: parentRef)
-
+        
         batch.commit { error in
             if let error = error {
                 print("❌ Misslyckades att ta bort barnet: \(error.localizedDescription)")

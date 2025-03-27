@@ -12,14 +12,14 @@ extension Color {
     static let pistachio = Color(hex: "#B1CFB7")
     static let vanilla = Color(hex: "#EFD9AA")
     static let apricot = Color(hex: "#EFBA93")
-
+    
     init(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.hasPrefix("#") ? String(hexSanitized.dropFirst()) : hexSanitized
-
+        
         let scanner = Scanner(string: hexSanitized)
         var rgb: UInt64 = 0
-
+        
         if scanner.scanHexInt64(&rgb) {
             let red = Double((rgb >> 16) & 0xFF) / 255.0
             let green = Double((rgb >> 8) & 0xFF) / 255.0

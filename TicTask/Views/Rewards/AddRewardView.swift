@@ -17,7 +17,7 @@ struct AddRewardView: View {
     @State private var selectedColor = "#FF5733" // 🔹 Standardfärg
     @State private var selectedIcon = "star.fill" // 🔹 Standardikon
     @State private var selectedChildren: [String] = []
-
+    
     let colorOptions: [(hex: String, color: Color)] = [
         ("#D7C2D8", Color.lilac),
         ("#B3D9E1", Color.polarsky),
@@ -25,7 +25,7 @@ struct AddRewardView: View {
         ("#EFD9AA", Color.vanilla),
         ("#EFBA93", Color.apricot)
     ]
-
+    
     let iconOptions = ["star.fill", "gift.fill", "heart.fill", "trophy.fill", "gamecontroller.fill"]
     
     var body: some View {
@@ -36,7 +36,7 @@ struct AddRewardView: View {
                     TextField("Beskrivning", text: $description)
                     Stepper("XP-kostnad: \(xpCost)", value: $xpCost, in: 5...100, step: 5)
                 }
-
+                
                 Section(header: Text("Välj ikon & färg")) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
@@ -45,14 +45,14 @@ struct AddRewardView: View {
                             }
                         }
                     }
-
+                    
                     HStack {
                         ForEach(colorOptions, id: \.hex) { colorOption in
                             colorSelectionButton(colorOption: colorOption)
                         }
                     }
                 }
-
+                
                 Section(header: Text("Välj barn")) {
                     if authViewModel.user?.role == "parent", !authViewModel.childrenUsers.isEmpty {
                         ForEach(authViewModel.childrenUsers) { child in
@@ -96,13 +96,13 @@ struct AddRewardView: View {
         
         showAddRewardView = false
     }
-
+    
     private func iconSelectionButton(icon: String) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
                 .fill(selectedIcon == icon ? Color.gray.opacity(0.3) : Color.clear)
                 .frame(width: 50, height: 50)
-
+            
             Image(systemName: icon)
                 .resizable()
                 .scaledToFit()
@@ -113,7 +113,7 @@ struct AddRewardView: View {
             selectedIcon = icon
         }
     }
-
+    
     private func colorSelectionButton(colorOption: (hex: String, color: Color)) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)

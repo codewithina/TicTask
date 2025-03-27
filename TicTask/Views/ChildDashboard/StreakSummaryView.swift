@@ -10,7 +10,7 @@ struct StreakSummaryView: View {
     @EnvironmentObject var taskViewModel: TaskViewModel
     let userID: String
     @State private var streakDays = 0
-
+    
     var body: some View {
         VStack {
             if taskViewModel.tasks.isEmpty {

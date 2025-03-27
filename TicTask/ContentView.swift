@@ -13,7 +13,7 @@ struct ContentView: View {
     @EnvironmentObject var rewardViewModel: RewardViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @EnvironmentObject var xpViewModel: XPViewModel
-
+    
     var body: some View {
         if authViewModel.isAuthenticated {
             MainTabView()

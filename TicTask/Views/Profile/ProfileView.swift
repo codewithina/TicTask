@@ -25,11 +25,11 @@ struct ProfileView: View {
                 ProfileHeaderView(userName: authViewModel.user?.name ?? "Okänt namn")
                 
                 Form {
-                    XPSectionView(xp: authViewModel.user?.xp ?? 0, totalXP: authViewModel.user?.totalXP ?? 0)
                     
                     if isParent {
                         ChildrenListView(authViewModel: authViewModel, showAddChildPopup: $showAddChildPopup)
                     } else {
+                        XPSectionView(xp: authViewModel.user?.xp ?? 0, totalXP: authViewModel.user?.totalXP ?? 0)
                         ParentListView(authViewModel: authViewModel)
                     }
                     

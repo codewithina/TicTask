@@ -9,7 +9,7 @@ import SwiftUI
 struct ChildSelectionRow: View {
     let child: User
     @Binding var selectedChildren: [String]
-
+    
     var body: some View {
         HStack {
             Text(child.name)
@@ -21,7 +21,7 @@ struct ChildSelectionRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             guard let childID = child.id else { return }
-
+            
             if selectedChildren.contains(childID) {
                 selectedChildren.removeAll { $0 == childID }
             } else {

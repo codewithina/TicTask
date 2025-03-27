@@ -18,7 +18,7 @@ struct Reward: Identifiable, Codable {
     let redeemedBy: [String]
     let iconName: String      // SF Symbol-name (ex: "star.fill")
     let colorHex: String      // Color in hex (ex: "#FF5733")
-
+    
     // Convert hex to SwiftUI Color
     func color() -> Color {
         return Color(hex: colorHex)
