@@ -15,6 +15,7 @@ enum XPBonusType: String, Codable {
     case dailyCombo
     case surprise
     case levelUp
+    case earlyBird
     
     var priority: Int {
         switch self {
@@ -24,6 +25,7 @@ enum XPBonusType: String, Codable {
         case .dailyCombo: return 3
         case .surprise: return 4
         case .levelUp: return 5
+        case .earlyBird: return 6
         }
     }
 }
